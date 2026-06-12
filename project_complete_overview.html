@@ -1,0 +1,666 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink:#0a0f1e; --navy:#0f1c2e; --blue:#0070f3; --blue2:#e8f4ff;
+  --teal:#00b4d8; --teal2:#e0f7fc; --green:#00c896; --green2:#e0faf3;
+  --amber:#f59e0b; --amber2:#fef3c7; --rose:#f43f5e; --rose2:#ffe4e8;
+  --violet:#7c3aed; --violet2:#ede9fe; --slate:#64748b;
+  --border:#e2e8f0; --bg:#f8fafc; --white:#fff;
+  --shadow:0 2px 8px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:13px;line-height:1.5;}
+h1,h2,h3{font-family:'Syne',sans-serif;}
+
+/* HEADER */
+.header{background:var(--navy);padding:28px 32px;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(0,112,243,.2),transparent 70%);}
+.header::after{content:'';position:absolute;bottom:-40px;left:20%;width:160px;height:160px;background:radial-gradient(circle,rgba(0,200,150,.1),transparent 70%);}
+.header-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,150,.15);border:1px solid rgba(0,200,150,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:#00c896;letter-spacing:.05em;margin-bottom:12px;}
+.header-title{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;margin-bottom:6px;}
+.header-sub{font-size:13px;color:#8fa3b8;max-width:560px;}
+.header-stats{display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;}
+.hstat{text-align:center;}
+.hstat-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#fff;}
+.hstat-lbl{font-size:10px;color:#4a6580;text-transform:uppercase;letter-spacing:.06em;}
+
+/* SECTION */
+.section{padding:20px 24px;border-bottom:1px solid var(--border);}
+.section:last-child{border-bottom:none;}
+.section-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.04em;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.section-title-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* TECH STACK GRID */
+.tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.tech-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.tech-layer{font-size:10px;font-weight:600;color:var(--slate);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.tech-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.tech-detail{font-size:11.5px;color:var(--slate);}
+
+/* MODULE STATUS */
+.module-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.module-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;}
+.module-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.module-name{font-weight:600;font-size:12.5px;color:var(--ink);margin-bottom:2px;}
+.module-desc{font-size:11.5px;color:var(--slate);line-height:1.5;}
+.status-done{background:var(--green2);color:var(--green);}
+.status-partial{background:var(--amber2);color:var(--amber);}
+
+/* ROLE CARDS */
+.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.role-card{border-radius:10px;padding:14px;border:1px solid;}
+.role-card.user{background:var(--blue2);border-color:#bfdbff;}
+.role-card.agent{background:var(--violet2);border-color:#c4b5fd;}
+.role-card.admin{background:var(--green2);border-color:#86efcf;}
+.role-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:8px;}
+.role-card.user .role-title{color:#1d4ed8;}
+.role-card.agent .role-title{color:#5b21b6;}
+.role-card.admin .role-title{color:#065f46;}
+.role-list{list-style:none;display:flex;flex-direction:column;gap:4px;}
+.role-list li{font-size:11.5px;display:flex;align-items:flex-start;gap:5px;}
+.role-list li::before{content:'→';font-weight:600;flex-shrink:0;}
+.role-card.user .role-list li{color:#1e40af;}
+.role-card.agent .role-list li{color:#5b21b6;}
+.role-card.admin .role-list li{color:#065f46;}
+
+/* FLOW */
+.flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;}
+.flow-step{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:500;color:var(--ink);text-align:center;min-width:90px;}
+.flow-arrow{color:var(--slate);font-size:14px;padding:0 6px;flex-shrink:0;}
+.flow-step.ai{background:var(--violet2);border-color:#c4b5fd;color:var(--violet);}
+.flow-step.highlight{background:var(--blue2);border-color:#bfdbff;color:var(--blue);}
+
+/* AI SECTION */
+.ai-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.ai-card{background:var(--ink);border-radius:10px;padding:14px;position:relative;overflow:hidden;}
+.ai-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:radial-gradient(circle,rgba(0,200,150,.15),transparent 70%);}
+.ai-card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:#fff;margin-bottom:6px;}
+.ai-card-desc{font-size:11.5px;color:#8fa3b8;line-height:1.6;}
+.ai-badge{display:inline-block;background:rgba(0,200,150,.15);border:1px solid rgba(0,200,150,.2);color:#00c896;font-size:10px;padding:2px 7px;border-radius:10px;margin-bottom:8px;font-weight:600;}
+
+/* DB TABLE */
+.db-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.db-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.db-name{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--blue);margin-bottom:5px;}
+.db-fields{font-size:11px;color:var(--slate);line-height:1.8;}
+.db-fields span{display:block;}
+.db-key{color:var(--amber);font-weight:600;}
+
+/* PENDING */
+.pending-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pending-item{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:8px;}
+.pending-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pending-text{font-size:12.5px;color:var(--ink);}
+.pending-tag{margin-left:auto;font-size:10px;padding:1px 7px;border-radius:8px;font-weight:500;white-space:nowrap;}
+
+/* AZURE */
+.azure-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.azure-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center;}
+.azure-icon{font-size:20px;margin-bottom:4px;}
+.azure-name{font-family:'Syne',sans-serif;font-weight:700;font-size:11px;color:var(--ink);margin-bottom:2px;}
+.azure-role{font-size:10.5px;color:var(--slate);}
+.azure-card.active{border-color:var(--blue);background:var(--blue2);}
+.azure-card.active .azure-name{color:var(--blue);}
+
+/* IMPROVEMENTS */
+.impr-list{display:flex;flex-direction:column;gap:6px;}
+.impr-item{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;}
+.impr-pri{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;flex-shrink:0;}
+.impr-pri.high{background:var(--rose2);color:var(--rose);}
+.impr-pri.med{background:var(--amber2);color:var(--amber);}
+.impr-text{font-size:12.5px;color:var(--ink);flex:1;}
+.impr-tag{font-size:10px;padding:1px 7px;border-radius:8px;font-weight:500;flex-shrink:0;}
+.tag-sec{background:var(--rose2);color:var(--rose);}
+.tag-ai{background:var(--violet2);color:var(--violet);}
+.tag-ux{background:var(--blue2);color:var(--blue);}
+.tag-perf{background:var(--green2);color:var(--green);}
+.tag-infra{background:var(--amber2);color:var(--amber);}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-badge">● Project Complete Overview</div>
+  <h1 class="header-title">Resolve — AI Helpdesk & Ticketing System</h1>
+  <p class="header-sub">Full-stack helpdesk platform with AI-powered duplicate detection, real-time notifications, fair performance tracking, and complete admin oversight.</p>
+  <div class="header-stats">
+    <div class="hstat"><div class="hstat-val">16</div><div class="hstat-lbl">Backend Modules</div></div>
+    <div class="hstat"><div class="hstat-val">14</div><div class="hstat-lbl">DB Tables</div></div>
+    <div class="hstat"><div class="hstat-val">3</div><div class="hstat-lbl">User Roles</div></div>
+    <div class="hstat"><div class="hstat-val">40+</div><div class="hstat-lbl">API Endpoints</div></div>
+    <div class="hstat"><div class="hstat-val">5</div><div class="hstat-lbl">Azure Services</div></div>
+    <div class="hstat"><div class="hstat-val">2</div><div class="hstat-lbl">AI Providers</div></div>
+  </div>
+</div>
+
+<!-- TECH STACK -->
+<div class="section">
+  <div class="section-title"><div class="section-title-dot" style="background:var(--blue)"></div>Tech Stack</div>
+  <div class="tech-grid">
+    <div class="tech-card">
+      <div class="tech-layer">Backend</div>
+      <div class="tech-name">Spring Boot 3.2</div>
+      <div class="tech-detail">Java 17 · Maven · Spring Security · JWT · Spring Data JPA · Flyway · Lombok · @Async · @Scheduled</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-layer">Frontend</div>
+      <div class="tech-name">React + Vite</div>
+      <div class="tech-detail">Tailwind CSS · Zustand · React Query · React Router · react-hook-form · Recharts · date-fns · react-hot-toast</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-layer">Database</div>
+      <div class="tech-name">PostgreSQL + pgvector</div>
+      <div class="tech-detail">Azure Database for PostgreSQL · pgvector v0.5 · vector(3072) · IVFFlat index · HikariCP pool</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-layer">AI — Embeddings</div>
+      <div class="tech-name">Azure OpenAI</div>
+      <div class="tech-detail">text-embedding-3-large · 3072 dimensions · 120K TPM · Southeast Asia region · ticketmapper-openai</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-layer">AI — Chat completions</div>
+      <div class="tech-name">Groq API</div>
+      <div class="tech-detail">llama-3.3-70b-versatile · Free tier · 6000 RPM · OpenAI-compatible API format · Zero latency</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-layer">Real-time</div>
+      <div class="tech-name">Spring WebSocket</div>
+      <div class="tech-detail">STOMP protocol · SockJS fallback · @stomp/stompjs (frontend) · sockjs-client · Auto-reconnect</div>
+    </div>
+  </div>
+</div>
+
+<!-- AZURE SERVICES -->
+<div class="section">
+  <div class="section-title"><div class="section-title-dot" style="background:var(--teal)"></div>Azure Services Used</div>
+  <div class="azure-grid">
+    <div class="azure-card active">
+      <div class="azure-icon">🤖</div>
+      <div class="azure-name">Azure OpenAI</div>
+      <div class="azure-role">Embeddings only · text-embedding-3-large · 120K TPM</div>
+    </div>
+    <div class="azure-card active">
+      <div class="azure-icon">🗄️</div>
+      <div class="azure-name">Azure PostgreSQL</div>
+      <div class="azure-role">Managed DB · pgvector enabled · Auto-backups</div>
+    </div>
+    <div class="azure-card active">
+      <div class="azure-icon">📦</div>
+      <div class="azure-name">Azure Blob Storage</div>
+      <div class="azure-role">File attachments · Screenshots · 5GB free tier</div>
+    </div>
+    <div class="azure-card active">
+      <div class="azure-icon">🌐</div>
+      <div class="azure-name">Azure App Service</div>
+      <div class="azure-role">Spring Boot hosting · Java runtime · Auto-scale</div>
+    </div>
+  </div>
+</div>
+
+<!-- THREE ROLES -->
+<div class="section">
+  <div class="section-title"><div class="section-title-dot" style="background:var(--violet)"></div>Three Roles & Their Capabilities</div>
+  <div class="role-grid">
+    <div class="role-card user">
+      <div class="role-title">👤 User (Customer)</div>
+      <ul class="role-list">
+        <li>Register and login with JWT auth</li>
+        <li>Submit tickets with attachments</li>
+        <li>AI search before submitting</li>
+        <li>View all personal tickets</li>
+        <li>Reply in thread conversation</li>
+        <li>Real-time notifications</li>
+        <li>Rate resolved tickets 1-5 stars</li>
+        <li>Reopen closed tickets</li>
+        <li>Browse knowledge base</li>
+        <li>Update own profile</li>
+      </ul>
+    </div>
+    <div class="role-card agent">
+      <div class="role-title">🎧 Agent (Support)</div>
+      <ul class="role-list">
+        <li>Unified inbox with SLA indicators</li>
+        <li>Filter by status, priority, category</li>
+        <li>View AI draft reply suggestion</li>
+        <li>See similar resolved tickets panel</li>
+        <li>Send replies + internal notes</li>
+        <li>Change ticket status and priority</li>
+        <li>Transfer tickets with reason</li>
+        <li>Link related tickets</li>
+        <li>AI thread summarization</li>
+        <li>Publish knowledge base articles</li>
+        <li>Create article from resolved ticket</li>
+      </ul>
+    </div>
+    <div class="role-card admin">
+      <div class="role-title">⚙️ Admin (Manager)</div>
+      <ul class="role-list">
+        <li>View all tickets system-wide</li>
+        <li>Create and manage agent accounts</li>
+        <li>Assign agents to categories</li>
+        <li>Promote/demote user roles</li>
+        <li>Configure SLA rules per priority</li>
+        <li>Approve knowledge base articles</li>
+        <li>Full analytics dashboard</li>
+        <li>Fair agent performance reports</li>
+        <li>User performance tracking</li>
+        <li>Ticket audit log with filters</li>
+        <li>SLA breach log (system vs agent fault)</li>
+        <li>Transfer log with timeline</li>
+        <li>Live activity feed via WebSocket</li>
+        <li>Manage categories and tags</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- TICKET LIFECYCLE FLOW -->
+<div class="section">
+  <div class="section-title"><div class="section-title-dot" style="background:var(--green)"></div>Complete Ticket Lifecycle</div>
+  <div class="flow">
+    <div class="flow-step highlight">User submits ticket</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step ai">AI embeds ticket (Azure)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step ai">pgvector similarity search</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step ai">Match ≥ 88%?</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step ai">Groq generates reply</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">AI auto-resolves</div>
+  </div>
+  <div style="margin:8px 0;font-size:11px;color:var(--slate);padding-left:4px">If no match (similarity below threshold):</div>
+  <div class="flow">
+    <div class="flow-step">No AI match</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Auto-assign (least-loaded agent)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Agent gets notified (WebSocket)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Agent replies with AI draft</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">User confirms</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step highlight">Rates + closes</div>
+  </div>
+</div>
+
+<!-- AI LAYER -->
+<div class="section">
+  <div class="section-title"><div class="section-title-dot" style="background:var(--violet)"></div>AI Layer — Hybrid Architecture</div>
+  <div class="ai-grid">
+    <div class="ai-card">
+      <div class="ai-badge">Azure OpenAI</div>
+      <div class="ai-card-title">Duplicate Detection (RAG)</div>
+      <div class="ai-card-desc">Every ticket is converted to a 3072-dimensional vector using text-embedding-3-large. pgvector cosine similarity search finds past resolved tickets above 0.88 threshold. If match found, Groq generates a contextual reply using matched tickets as context.</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-badge">Groq — llama-3.3-70b</div>
+      <div class="ai-card-title">AI Draft Reply + Summarization</div>
+      <div class="ai-card-desc">Agents get a pre-generated draft reply based on similar past tickets and knowledge articles. Long threads can be summarized in 3-4 sentences. All chat completions routed through Groq (free, 6000 RPM) to avoid Azure quota issues.</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-badge">pgvector</div>
+      <div class="ai-card-title">Semantic Search</div>
+      <div class="ai-card-desc">Users search before submitting — AI finds semantically similar resolved tickets and knowledge articles even when exact words don't match. IVFFlat index makes search fast at scale without scanning every row.</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-badge">Caffeine Cache + @Retryable</div>
+      <div class="ai-card-title">Reliability Layer</div>
+      <div class="ai-card-desc">Embeddings cached for 24 hours to reduce API calls. @Retryable with 60 second backoff on failures. @Async processing so ticket creation responds instantly while AI runs in background. Circuit breaker degrades gracefully on AI outage.</div>
+    </div>
+  </div>
+</div>
+
+<!-- BACKEND MODULES -->
+<div class="section">
+  <div class="section-title"><div class="section-title-dot" style="background:var(--blue)"></div>Backend Modules — All Implemented</div>
+  <div class="module-grid">
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Auth + Security</div><div class="module-desc">JWT tokens · Spring Security · BCrypt passwords · Role-based guards · UserDetailsService · JwtFilter</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Ticket CRUD</div><div class="module-desc">Create, read, update · Role-filtered views · Status machine · Priority management · Pagination</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Replies + Internal Notes</div><div class="module-desc">Thread-based conversation · Internal notes (agent-only) · AI-generated reply flag · File attachments</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Auto-Assignment</div><div class="module-desc">Least-loaded agent by category · Workload-balanced · Falls back to unassigned if no eligible agent</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Notifications + WebSocket</div><div class="module-desc">STOMP WebSocket · DB persistence · 6 notification types · Real-time push + offline retrieval</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">AI Layer</div><div class="module-desc">Embeddings · Similarity search · Auto-resolve · Draft reply · Thread summary · Semantic search</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Ticket Transfer</div><div class="module-desc">Transfer with reason · Full transfer history · Internal note on thread · Both agents notified</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Knowledge Base</div><div class="module-desc">Agent drafts · Admin approval workflow · Embedded for AI search · Create from resolved ticket</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Ratings + Feedback</div><div class="module-desc">1-5 star rating · Optional comment · Auto-close on rating · Per-agent and per-category analytics</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Admin User Management</div><div class="module-desc">Create agents · Role promotion · Category assignment · Workload view · Deactivate with ticket reassign</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">SLA Rules + Breach Detection</div><div class="module-desc">Configurable per priority · @Scheduled every 15min · Admin breach alerts · SLA status per ticket</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Admin Analytics</div><div class="module-desc">Ticket volume trends · AI resolution rate · Agent performance · Satisfaction scores · Category breakdown</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Ticket Linking</div><div class="module-desc">Link related tickets · Bulk resolve linked · Unlink · Notifies all linked ticket users on resolution</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">File Attachments</div><div class="module-desc">Azure Blob Storage · Upload on ticket and reply · File URL in DB · Type + size validation</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Email Notifications</div><div class="module-desc">Resend/Gmail SMTP · HTML templates · 4 event types · Fire-and-forget (never blocks main flow)</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Fair Performance Tracking</div><div class="module-desc">Ticket timeline · Late-assignment detection · Agent FRT · SLA compliance excluding late-assigned · User metrics</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DATABASE -->
+<div class="section">
+  <div class="section-title"><div class="section-title-dot" style="background:var(--amber)"></div>Database — 14 Tables across 14 Flyway Migrations</div>
+  <div class="db-grid">
+    <div class="db-card">
+      <div class="db-name">users</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>name · email · password</span>
+        <span>role ENUM · category_id</span>
+        <span>is_active · created_at</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">tickets</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>title · description · status</span>
+        <span>priority · category_id</span>
+        <span>created_by · assigned_to</span>
+        <span>embedding vector(3072)</span>
+        <span>ai_resolved · resolved_at</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">replies</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>ticket_id · sender_id</span>
+        <span>message TEXT</span>
+        <span>is_internal · is_ai_generated</span>
+        <span>created_at</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">categories</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>name UNIQUE · description</span>
+        <span>created_at</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">ratings</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>ticket_id UNIQUE · user_id</span>
+        <span>score 1-5 · comment</span>
+        <span>created_at</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">notifications</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>user_id · ticket_id</span>
+        <span>type ENUM · message</span>
+        <span>is_read · created_at</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">ticket_transfers</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>ticket_id · from_agent_id</span>
+        <span>to_agent_id · reason</span>
+        <span>transferred_at</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">ticket_links</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>ticket_a_id · ticket_b_id</span>
+        <span>linked_by · linked_at</span>
+        <span>UNIQUE(a,b)</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">knowledge_articles</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>title · content TEXT</span>
+        <span>category_id · author_id</span>
+        <span>embedding vector(3072)</span>
+        <span>is_published · created_at</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">attachments</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>ticket_id · reply_id</span>
+        <span>uploaded_by · file_name</span>
+        <span>file_url · file_size</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">sla_rules</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>priority UNIQUE ENUM</span>
+        <span>response_hours</span>
+        <span>resolution_hours</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">ticket_timeline</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>ticket_id · actor_id</span>
+        <span>event_type ENUM</span>
+        <span>actor_role · note</span>
+        <span>occurred_at</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">agent_performance_snapshots</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>agent_id · period_start/end</span>
+        <span>sla_eligible/compliant</span>
+        <span>avg_frt · avg_handle_time</span>
+        <span>late_assigned_count</span>
+      </div>
+    </div>
+    <div class="db-card">
+      <div class="db-name">user_performance_snapshots</div>
+      <div class="db-fields">
+        <span><span class="db-key">id</span> UUID PK</span>
+        <span>user_id · period_start/end</span>
+        <span>avg_response_minutes</span>
+        <span>repeat_issue_count</span>
+        <span>ticket_quality_score</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FRONTEND STATUS -->
+<div class="section">
+  <div class="section-title"><div class="section-title-dot" style="background:var(--teal)"></div>Frontend — Status</div>
+  <div class="module-grid">
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Project Structure</div><div class="module-desc">Vite + React · Tailwind · All folders created · All dependencies installed · Proxy configured</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Auth Store + Axios</div><div class="module-desc">Zustand with localStorage persistence · JWT interceptor · Auto-logout on 401 · Role-based redirect</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Routing + Protected Routes</div><div class="module-desc">AppRouter · ProtectedRoute blocks wrong roles · Role-based dashboard redirect on login</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">WebSocket Hook</div><div class="module-desc">useSocket · STOMP connection · Auto-reconnect · Personal notification topic subscription</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Auth Pages</div><div class="module-desc">Login + Register · react-hook-form validation · Role-based redirect after login · Error handling</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">Dashboard Layout</div><div class="module-desc">Sidebar (role-based nav) · Topbar · NotificationBell (live) · DashboardLayout wrapper</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-done">✅</div>
+      <div><div class="module-name">UI Template</div><div class="module-desc">Professional design · Syne + DM Sans · Navy sidebar · Azure blue accent · All 3 dashboards interactive</div></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon status-partial">🔄</div>
+      <div><div class="module-name">Individual Pages</div><div class="module-desc">Structure built · API layer defined · Pages need connecting to real backend calls</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PENDING -->
+<div class="section">
+  <div class="section-title"><div class="section-title-dot" style="background:var(--amber)"></div>What Still Needs to Be Done</div>
+  <div class="pending-grid">
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--rose)"></div>
+      <div class="pending-text">Connect frontend pages to real backend APIs</div>
+      <div class="pending-tag" style="background:var(--rose2);color:var(--rose)">High</div>
+    </div>
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--rose)"></div>
+      <div class="pending-text">Rate limiting on auth and API endpoints</div>
+      <div class="pending-tag" style="background:var(--rose2);color:var(--rose)">Security</div>
+    </div>
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--rose)"></div>
+      <div class="pending-text">JWT refresh token mechanism</div>
+      <div class="pending-tag" style="background:var(--rose2);color:var(--rose)">Security</div>
+    </div>
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--rose)"></div>
+      <div class="pending-text">N+1 query problem fix with @EntityGraph</div>
+      <div class="pending-tag" style="background:var(--rose2);color:var(--rose)">Critical</div>
+    </div>
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--amber)"></div>
+      <div class="pending-text">Unit + integration tests (seniors will ask)</div>
+      <div class="pending-tag" style="background:var(--amber2);color:var(--amber)">Medium</div>
+    </div>
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--amber)"></div>
+      <div class="pending-text">Swagger / OpenAPI documentation</div>
+      <div class="pending-tag" style="background:var(--amber2);color:var(--amber)">Medium</div>
+    </div>
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--amber)"></div>
+      <div class="pending-text">CI/CD pipeline with GitHub Actions</div>
+      <div class="pending-tag" style="background:var(--amber2);color:var(--amber)">Medium</div>
+    </div>
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--amber)"></div>
+      <div class="pending-text">Dev vs prod environment config split</div>
+      <div class="pending-tag" style="background:var(--amber2);color:var(--amber)">Medium</div>
+    </div>
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--slate)"></div>
+      <div class="pending-text">Rich text editor for agent replies</div>
+      <div class="pending-tag" style="background:var(--bg);color:var(--slate)">Nice</div>
+    </div>
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--slate)"></div>
+      <div class="pending-text">Ticket templates per category</div>
+      <div class="pending-tag" style="background:var(--bg);color:var(--slate)">Nice</div>
+    </div>
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--slate)"></div>
+      <div class="pending-text">Azure Application Insights monitoring</div>
+      <div class="pending-tag" style="background:var(--bg);color:var(--slate)">Nice</div>
+    </div>
+    <div class="pending-item">
+      <div class="pending-dot" style="background:var(--slate)"></div>
+      <div class="pending-text">AI sentiment analysis on tickets</div>
+      <div class="pending-tag" style="background:var(--bg);color:var(--slate)">Nice</div>
+    </div>
+  </div>
+</div>
+
+<!-- WHAT MAKES IT STAND OUT -->
+<div class="section">
+  <div class="section-title"><div class="section-title-dot" style="background:var(--green)"></div>What Makes This Project Stand Out for Seniors</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div style="background:var(--ink);border-radius:10px;padding:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-15px;right:-15px;width:60px;height:60px;background:radial-gradient(circle,rgba(0,112,243,.2),transparent 70%)"></div>
+      <div style="font-family:Syne,sans-serif;font-weight:700;font-size:12px;color:#fff;margin-bottom:6px">Hybrid AI Architecture</div>
+      <div style="font-size:11.5px;color:#8fa3b8;line-height:1.6">Azure for embeddings (quota-limited but working) + Groq for chat (free, fast) — real-world constraint-driven decision, not textbook. Shows you can adapt to infrastructure limitations.</div>
+    </div>
+    <div style="background:var(--ink);border-radius:10px;padding:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-15px;right:-15px;width:60px;height:60px;background:radial-gradient(circle,rgba(0,200,150,.15),transparent 70%)"></div>
+      <div style="font-family:Syne,sans-serif;font-weight:700;font-size:12px;color:#fff;margin-bottom:6px">Fair Performance System</div>
+      <div style="font-size:11.5px;color:#8fa3b8;line-height:1.6">Late-assignment detection, transfer-aware SLA, system vs agent fault attribution — this is a problem real companies struggle with. Solving it correctly shows systems thinking beyond CRUD.</div>
+    </div>
+    <div style="background:var(--ink);border-radius:10px;padding:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-15px;right:-15px;width:60px;height:60px;background:radial-gradient(circle,rgba(124,58,237,.15),transparent 70%)"></div>
+      <div style="font-family:Syne,sans-serif;font-weight:700;font-size:12px;color:#fff;margin-bottom:6px">Self-improving Knowledge Base</div>
+      <div style="font-size:11.5px;color:#8fa3b8;line-height:1.6">Every resolved ticket can become a knowledge article. Every article improves AI accuracy. The system gets smarter over time without retraining — a genuine flywheel, not a gimmick.</div>
+    </div>
+    <div style="background:var(--ink);border-radius:10px;padding:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-15px;right:-15px;width:60px;height:60px;background:radial-gradient(circle,rgba(245,158,11,.1),transparent 70%)"></div>
+      <div style="font-family:Syne,sans-serif;font-weight:700;font-size:12px;color:#fff;margin-bottom:6px">Production-grade Design Decisions</div>
+      <div style="font-size:11.5px;color:#8fa3b8;line-height:1.6">Soft deletes, @Async AI processing, embedding caching, circuit breaker pattern, role-scoped data access, Flyway migrations — each decision has a real reason behind it you can explain to any senior.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

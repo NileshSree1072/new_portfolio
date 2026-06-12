@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NILESH // PLAYER_01</title>
+  <meta name="description" content="Gamified RPG portfolio of Nilesh — Full-Stack Engineer & AI/ML Explorer." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       CUSTOM PIXEL CROSSHAIR CURSOR
+    ============================================================ */
+    /* Default: crosshair reticle (center 2x2 dot + 4 ticks, dark outline) */
+    *, *::before, *::after {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' shape-rendering='crispEdges'%3E%3Cg fill='%23003344'%3E%3Crect x='10' y='1' width='4' height='6'/%3E%3Crect x='10' y='17' width='4' height='6'/%3E%3Crect x='1' y='10' width='6' height='4'/%3E%3Crect x='17' y='10' width='6' height='4'/%3E%3Crect x='9' y='9' width='6' height='6'/%3E%3C/g%3E%3Cg fill='%2300d4ff'%3E%3Crect x='11' y='2' width='2' height='5'/%3E%3Crect x='11' y='17' width='2' height='5'/%3E%3Crect x='2' y='11' width='5' height='2'/%3E%3Crect x='17' y='11' width='5' height='2'/%3E%3Crect x='11' y='11' width='2' height='2'/%3E%3C/g%3E%3C/svg%3E") 12 12, crosshair;
+    }
+    /* Interactive: crosshair with cyan diamond center ("target locked") */
+    a, button, [role="button"], .pixel-box, .player-card, .start-btn, .profile-btn,
+    .quest, .qbtn, .node, .nav a, .mini, .send, .nav-toggle, label[for] {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' shape-rendering='crispEdges'%3E%3Cg fill='%23003344'%3E%3Crect x='10' y='0' width='4' height='6'/%3E%3Crect x='10' y='18' width='4' height='6'/%3E%3Crect x='0' y='10' width='6' height='4'/%3E%3Crect x='18' y='10' width='6' height='4'/%3E%3Crect x='8' y='8' width='8' height='8'/%3E%3C/g%3E%3Cg fill='%2300d4ff'%3E%3Crect x='11' y='1' width='2' height='5'/%3E%3Crect x='11' y='18' width='2' height='5'/%3E%3Crect x='1' y='11' width='5' height='2'/%3E%3Crect x='18' y='11' width='5' height='2'/%3E%3Crect x='11' y='9' width='2' height='6'/%3E%3Crect x='9' y='11' width='6' height='2'/%3E%3Crect x='10' y='10' width='4' height='4'/%3E%3C/g%3E%3C/svg%3E") 12 12, pointer !important;
+    }
+    /* Selectable text: cyan caret */
+    input, textarea {
+      cursor: text;
+      caret-color: var(--cyan, #00d4ff);
+    }
+    /* Click burst effect */
+    .click-burst { position: fixed; left: 0; top: 0; width: 0; height: 0; pointer-events: none; z-index: 99999; }
+    .click-burst span {
+      position: absolute; width: 5px; height: 5px; background: #00d4ff;
+      image-rendering: pixelated; box-shadow: 0 0 4px rgba(0,212,255,0.8);
+      animation: burst-fly 300ms ease-out forwards;
+    }
+    .click-burst span:nth-child(1) { --bx: 14px;  --by: -14px; }
+    .click-burst span:nth-child(2) { --bx: -14px; --by: -14px; }
+    .click-burst span:nth-child(3) { --bx: 14px;  --by: 14px; }
+    .click-burst span:nth-child(4) { --bx: -14px; --by: 14px; }
+    @keyframes burst-fly {
+      0%   { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--bx), var(--by)) scale(0.4); opacity: 0; }
+    }
+    /* Touch/mobile: restore native cursor */
+    @media (pointer: coarse) {
+      *, *::before, *::after,
+      a, button, [role="button"], .pixel-box, .player-card, .start-btn, .profile-btn,
+      .quest, .qbtn, .node, .nav a, .mini, label[for] { cursor: auto; }
+    }
+
+    /* ============================================================
+       TOKENS
+    ============================================================ */
+    :root {
+      --bg:        #0a0e1a;
+      --bg-2:      #0c1124;
+      --card:      #1a0a2e;
+      --card-2:    #150a26;
+      --cyan:      #00d4ff;
+      --gold:      #f5c518;
+      --green:     #39ff7a;
+      --lc-easy:   #00b894;
+      --lc-med:    #f5c518;
+      --lc-hard:   #ff4757;
+      --text:      #cdd6f4;
+      --muted:     #7b86a8;
+      --border:    #2a2350;
+      --locked:    #2c3350;
+      --px:        4px; /* pixel border thickness */
+      --font-px:   'Press Start 2P', monospace;
+      --font-body: 'Inter', system-ui, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--bg); scroll-padding-top: 80px; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: var(--cyan); color: #000; }
+
+    .px { font-family: var(--font-px); line-height: 1.5; }
+    .cyan { color: var(--cyan); }
+    .gold { color: var(--gold); }
+    .green { color: var(--green); }
+
+    /* Pixel border helper (hard-edged box shadow stack) */
+    .pixel-box {
+      position: relative;
+      background: var(--card);
+      border: var(--px) solid #000;
+      box-shadow:
+        0 0 0 var(--px) var(--border),
+        8px 8px 0 0 rgba(0,0,0,0.6);
+    }
+
+    /* ============================================================
+       LOADING SCREEN
+    ============================================================ */
+    #loader {
+      position: fixed; inset: 0; z-index: 1000;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 28px;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    #loader.done { opacity: 0; visibility: hidden; }
+    #loader .title { font-size: 18px; color: var(--cyan); letter-spacing: 2px; }
+    #loader .bar-wrap {
+      width: min(360px, 80vw); height: 26px;
+      border: var(--px) solid #000;
+      box-shadow: 0 0 0 var(--px) var(--cyan);
+      background: #050811; padding: 4px;
+    }
+    #loader .bar { height: 100%; width: 0%; background: var(--cyan); transition: width 0.1s linear; }
+    #loader .pct { font-family: var(--font-px); font-size: 10px; color: var(--gold); }
+
+    /* ============================================================
+       NAVBAR
+    ============================================================ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px clamp(16px, 4vw, 48px);
+      background: rgba(10,14,26,0.72);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid var(--border);
+    }
+    nav .brand { font-family: var(--font-px); font-size: 12px; color: var(--gold); }
+    nav .links { display: flex; gap: 4px; }
+    nav .links a {
+      font-family: var(--font-px); font-size: 9px; color: var(--muted);
+      padding: 10px 12px; border: 2px solid transparent;
+      transition: all 0.15s ease;
+    }
+    nav .links a:hover { color: var(--cyan); border-color: var(--cyan); }
+    nav .xp {
+      font-family: var(--font-px); font-size: 9px; color: var(--gold);
+      display: flex; align-items: center; gap: 8px;
+    }
+    nav .xp .xp-bar { width: 70px; height: 10px; background: #050811; border: 2px solid var(--border); padding: 1px; }
+    nav .xp .xp-fill { height: 100%; width: 5%; background: var(--gold); transition: width 0.2s ease; }
+    .nav-toggle { display: none; background: none; border: 2px solid var(--cyan); color: var(--cyan); font-family: var(--font-px); font-size: 10px; padding: 8px 10px; cursor: pointer; }
+
+    /* ============================================================
+       LAYOUT / SECTIONS
+    ============================================================ */
+    section { padding: clamp(64px, 10vh, 120px) clamp(16px, 5vw, 64px); position: relative; }
+    .section-head { text-align: center; margin-bottom: 56px; }
+    .section-head .eyebrow { font-family: var(--font-px); font-size: 10px; color: var(--gold); letter-spacing: 2px; }
+    .section-head h2 { font-family: var(--font-px); font-size: clamp(18px, 3vw, 30px); color: var(--cyan); margin-top: 16px; text-shadow: 0 0 18px rgba(0,212,255,0.4); }
+    .section-head p { font-family: var(--font-px); font-size: 8px; line-height: 1.8; color: var(--muted); max-width: 540px; margin: 16px auto 0; }
+    .container { max-width: 1120px; margin: 0 auto; }
+
+    /* Reveal animation */
+    .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    #hero {
+      position: relative;
+      height: 100vh; overflow: hidden;
+      padding-top: 70px;
+    }
+    /* Split two-column grid */
+    .hero-grid {
+      position: relative; z-index: 6;
+      height: 100%;
+      display: grid; grid-template-columns: 1fr 1fr;
+    }
+    .hero-left {
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 0 clamp(24px, 5vw, 80px);
+      height: 100%;
+    }
+    .hero-right {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 18px; height: 100%;
+      padding: 0 clamp(16px, 3vw, 40px);
+    }
+    /* Right-column floating data chips */
+    .data-chips { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; z-index: 6; }
+    .data-chips .chip {
+      font-family: var(--font-px); font-size: 8px; color: var(--cyan);
+      background: rgba(0,212,255,0.06);
+      border: 2px solid var(--cyan); padding: 9px 12px;
+      box-shadow: 3px 3px 0 0 rgba(0,0,0,0.5);
+      letter-spacing: 1px;
+    }
+    /* Parallax cityscape layers */
+    .city {
+      position: absolute; left: -5%; right: -5%; bottom: 0;
+      height: 60%; pointer-events: none; will-change: transform;
+      background-repeat: repeat-x; background-position: bottom;
+      image-rendering: pixelated;
+    }
+    .city-1 { z-index: 1; opacity: 0.35; background-image:
+      linear-gradient(to top, #10183a 0%, transparent 100%);
+      height: 45%; }
+    .city-2 { z-index: 2; height: 32%; opacity: 0.85;
+      background: repeating-linear-gradient(90deg,
+        #131c40 0 38px, transparent 38px 56px,
+        #182250 56px 96px, transparent 96px 120px);
+      -webkit-mask-image: linear-gradient(to top, #000 30%, transparent 100%);
+      mask-image: linear-gradient(to top, #000 30%, transparent 100%);
+    }
+    .city-3 { z-index: 3; height: 20%; opacity: 1;
+      background: repeating-linear-gradient(90deg,
+        #1c2a5e 0 26px, transparent 26px 48px,
+        #24347a 48px 70px, transparent 70px 92px);
+      -webkit-mask-image: linear-gradient(to top, #000 40%, transparent 100%);
+      mask-image: linear-gradient(to top, #000 40%, transparent 100%);
+    }
+    /* Star field */
+    .stars { position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+        radial-gradient(1px 1px at 60% 20%, #9fe9ff, transparent),
+        radial-gradient(1px 1px at 80% 60%, #fff, transparent),
+        radial-gradient(1px 1px at 35% 70%, #f5c518, transparent),
+        radial-gradient(1px 1px at 50% 50%, #fff, transparent),
+        radial-gradient(1px 1px at 90% 40%, #9fe9ff, transparent);
+      opacity: 0.6;
+    }
+
+    /* Three.js mount point */
+    #orb-canvas {
+      position: relative; z-index: 5; overflow: visible;
+      width: min(440px, 80%); height: min(440px, 60vh);
+      min-height: 340px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: grab;
+    }
+    #orb-canvas:active { cursor: grabbing; }
+    #orb-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
+    #orb-canvas .orb-fallback {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-px); font-size: 9px; color: var(--cyan);
+      border: 3px solid var(--cyan); border-radius: 50%;
+      box-shadow: 0 0 40px rgba(0,212,255,0.4), inset 0 0 40px rgba(0,212,255,0.15);
+      animation: spin 12s linear infinite; margin: auto; width: 60%; aspect-ratio: 1;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* Skills constellation canvas */
+    #skills { position: relative; }
+    #constellation { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.5; }
+    #skills .container { position: relative; z-index: 1; }
+
+    /* Player card */
+    .player-card {
+      position: relative; z-index: 6;
+      width: min(440px, 100%);
+      padding: 26px 28px; text-align: left;
+    }
+    .player-card .ptag { font-family: var(--font-px); font-size: 11px; color: var(--gold); }
+    /* Pixel avatar placeholder */
+    .player-card .avatar {
+      width: 48px; height: 48px; margin-bottom: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-px); font-size: 11px; color: var(--gold);
+      border: 3px solid var(--cyan); background: #050811;
+      box-shadow: 0 0 12px rgba(0,212,255,0.4);
+    }
+    .player-card .name-wrap { display: flex; align-items: center; gap: 6px; }
+    .player-card h1 { font-family: var(--font-px); font-size: 22px; color: #fff; margin: 14px 0 8px; }
+    .player-card .cursor {
+      display: inline-block; width: 3px; height: 28px; background: var(--cyan);
+      margin: 14px 0 8px; animation: blink-cursor 0.8s step-end infinite;
+    }
+    @keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+    /* Inline stat badges below START */
+    .stat-badges { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .stat-badges .badge {
+      font-family: var(--font-px); font-size: 7px; color: var(--gold);
+      background: var(--card-2); border: 2px solid var(--border);
+      padding: 8px 10px; letter-spacing: 1px;
+    }
+    /* Social quick-link controller buttons */
+    .player-socials { display: flex; gap: 10px; margin-top: 16px; }
+    .player-socials a {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-px); font-size: 9px; color: var(--cyan);
+      border: 2px solid var(--cyan); background: #050811;
+      transition: all 0.12s ease;
+    }
+    .player-socials a:hover { background: var(--cyan); color: #000; }
+    .player-card .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-family: var(--font-px); font-size: 8px; color: var(--muted); padding: 9px 0; border-bottom: 1px dashed var(--border); }
+    .player-card .row span:last-child { font-family: var(--font-px); font-size: 10px; color: var(--cyan); letter-spacing: 0.05em; line-height: 1.6; text-align: right; }
+    .player-card .xp-label { font-family: var(--font-px); font-size: 8px; color: var(--cyan); margin: 14px 0 6px; }
+    .player-card .xpbar { height: 16px; background: #050811; border: 2px solid var(--border); padding: 2px; }
+    .player-card .xpbar i { display: block; height: 100%; width: 78%; background: linear-gradient(90deg, var(--cyan), var(--gold)); }
+
+    .start-btn {
+      font-family: var(--font-px); font-size: 12px; color: #000;
+      background: var(--cyan); border: var(--px) solid #000;
+      box-shadow: 6px 6px 0 0 rgba(0,0,0,0.6);
+      padding: 16px 26px; margin-top: 22px; cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+    .start-btn:hover { animation: pulse 0.7s ease infinite; }
+    @keyframes pulse { 0%,100% { transform: translate(0,0); box-shadow: 6px 6px 0 0 rgba(0,0,0,0.6);} 50% { transform: translate(2px,2px); box-shadow: 3px 3px 0 0 rgba(0,0,0,0.6);} }
+
+    /* ============================================================
+       HERO HUD / ATMOSPHERE
+    ============================================================ */
+    /* Scanline overlay */
+    .scanlines {
+      position: absolute; inset: 0; z-index: 4; pointer-events: none;
+      background: repeating-linear-gradient(
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px
+      );
+    }
+    /* Corner HUD elements */
+    .hud { position: absolute; z-index: 7; pointer-events: none; font-family: var(--font-px); }
+    .hud-tl { top: 84px; left: clamp(16px, 4vw, 48px); }
+    .hud-tl .label { font-size: 8px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+    .hud-dot {
+      width: 7px; height: 7px; background: var(--green); display: inline-block;
+      box-shadow: 0 0 6px var(--green); animation: blink-cursor 1s step-end infinite;
+    }
+    .hud-tr { top: 84px; right: clamp(16px, 4vw, 48px); text-align: right; }
+    .hud-tr .session { font-size: 6px; color: var(--cyan); animation: blink-cursor 1.2s step-end infinite; }
+    /* System status mini panel */
+    .hud-br {
+      bottom: 70px; right: clamp(16px, 4vw, 48px);
+      background: rgba(5,8,17,0.85); border: 2px solid var(--cyan);
+      box-shadow: 0 0 14px rgba(0,212,255,0.25);
+      padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .hud-br .sys-row { display: flex; align-items: center; gap: 8px; font-size: 6px; color: var(--cyan); }
+    .hud-br .sys-row .k { width: 22px; }
+    .hud-br .sys-row .pct { color: var(--gold); }
+    /* Floating cyan diamond particles */
+    .diamonds { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+    .diamonds i {
+      position: absolute; bottom: -20px; width: 10px; height: 10px;
+      background: var(--cyan); transform: rotate(45deg);
+      box-shadow: 0 0 10px rgba(0,212,255,0.7); opacity: 0;
+      animation: float-diamond linear infinite;
+    }
+    @keyframes float-diamond {
+      0%   { transform: translateY(0) rotate(45deg); opacity: 0; }
+      10%  { opacity: 0.7; }
+      90%  { opacity: 0.4; }
+      100% { transform: translateY(-100vh) rotate(45deg); opacity: 0; }
+    }
+    /* Scrolling ticker bar */
+    .ticker {
+      position: absolute; left: 0; right: 0; bottom: 0; z-index: 8;
+      background: var(--gold); overflow: hidden;
+      border-top: 3px solid #000; border-bottom: 3px solid #000;
+      padding: 7px 0;
+    }
+    .ticker .track {
+      display: inline-flex; white-space: nowrap;
+      font-family: var(--font-px); font-size: 7px; color: #000;
+      animation: ticker-scroll 30s linear infinite;
+    }
+    .ticker .track span { padding-right: 0; }
+    @keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ============================================================
+       SKILLS — ABILITY TREE
+    ============================================================ */
+    .tree { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 28px; }
+    .branch { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+    .branch .branch-title { font-family: var(--font-px); font-size: 10px; color: var(--gold); }
+    .node {
+      position: relative; width: 120px; height: 132px;
+      clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+      background: var(--card); border: 2px solid var(--border);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; cursor: pointer; transition: all 0.2s ease;
+    }
+    .node .icon { font-family: var(--font-px); font-size: 11px; color: var(--cyan); pointer-events: none; }
+    .node .label { font-family: var(--font-px); font-size: 8px; color: var(--cyan); text-align: center; line-height: 1.6; padding: 0 8px; pointer-events: none; }
+    .node.unlocked { box-shadow: 0 0 18px rgba(0,212,255,0.35); border-color: var(--cyan); }
+    .node.locked { filter: grayscale(1) brightness(0.6); }
+    .node.locked .icon { color: var(--locked); }
+    .node:hover { transform: translateY(-6px) scale(1.04); }
+    .branch .connector { width: 2px; height: 18px; background: var(--cyan); opacity: 0.4; }
+
+    /* Skill tooltip — rendered at body level (escapes node clip-path) */
+    #skill-tip {
+      position: fixed; z-index: 9999; pointer-events: none;
+      min-width: 180px; max-width: 240px;
+      background: #0a0e1a; border: 1px solid var(--cyan);
+      box-shadow: 0 0 18px rgba(0,212,255,0.4);
+      padding: 12px 14px; opacity: 0; transform: translateY(4px);
+      transition: opacity 0.1s ease, transform 0.1s ease;
+    }
+    #skill-tip.show { opacity: 1; transform: translateY(0); }
+    #skill-tip .tip-name { font-family: var(--font-px); font-size: 9px; color: var(--cyan); margin-bottom: 8px; letter-spacing: 1px; }
+    #skill-tip .tip-badge { display: inline-block; font-family: var(--font-px); font-size: 7px; color: #000; padding: 4px 6px; margin-bottom: 8px; letter-spacing: 1px; }
+    #skill-tip .tip-badge.mastered   { background: var(--green); }
+    #skill-tip .tip-badge.proficient { background: var(--cyan); }
+    #skill-tip .tip-badge.learning   { background: var(--gold); }
+    #skill-tip .tip-badge.locked     { background: var(--locked); color: var(--text); }
+    #skill-tip .tip-desc { font-family: var(--font-body); font-size: 12px; line-height: 1.5; color: var(--muted); }
+
+    /* ============================================================
+       PROJECTS — QUEST LOG
+    ============================================================ */
+    .quests { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 28px; }
+    .quest {
+      padding: 22px; display: flex; flex-direction: column; gap: 12px;
+      transition: transform 0.15s ease;
+    }
+    .quest .qhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .quest h3 { font-family: var(--font-px); font-size: 12px; color: var(--cyan); line-height: 1.6; }
+    .quest .stars { position: static; font-size: 12px; color: var(--gold); letter-spacing: 1px; }
+    .quest p { font-family: var(--font-px); font-size: 7px; color: var(--muted); line-height: 1.8; min-height: 42px; }
+    .quest .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .quest .tag { font-family: var(--font-px); font-size: 7px; color: var(--gold); background: var(--card-2); border: 1px solid var(--border); padding: 5px 7px; }
+    .quest .qbtn { font-family: var(--font-px); font-size: 9px; color: #000; background: var(--gold); border: 2px solid #000; padding: 10px 12px; text-align: center; cursor: pointer; margin-top: auto; transition: transform 0.1s ease; }
+    .quest .qbtn:hover { transform: translate(2px,2px); }
+
+    /* ============================================================
+       TRAINING GROUNDS (LeetCode stats)
+    ============================================================ */
+    .training-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 28px; align-items: start; }
+    /* Left — warrior stats card */
+    .warrior { padding: 26px; display: flex; flex-direction: column; gap: 6px; }
+    .warrior .class-tag { display: flex; align-items: center; gap: 10px; font-family: var(--font-px); font-size: 9px; color: var(--gold); margin-bottom: 12px; }
+    .warrior .class-tag .sword { width: 22px; height: 22px; flex-shrink: 0; image-rendering: pixelated; }
+    .warrior .stat { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-px); font-size: 8px; padding: 11px 0; border-bottom: 1px dashed var(--border); }
+    .warrior .stat .k { color: var(--muted); letter-spacing: 1px; }
+    .warrior .stat .v { color: var(--text); }
+    .warrior .stat .v.hot { color: var(--gold); }
+    .warrior .nextrank { font-family: var(--font-px); font-size: 8px; color: var(--cyan); margin: 18px 0 8px; line-height: 1.8; }
+    .warrior .xpbar { height: 18px; background: #050811; border: 2px solid var(--border); padding: 2px; }
+    .warrior .xpbar i { display: block; height: 100%; width: 65%; background: linear-gradient(90deg, var(--cyan), #6ee7ff);
+      box-shadow: 0 0 12px rgba(0,212,255,0.7); animation: xpglow 2s ease-in-out infinite; }
+    @keyframes xpglow { 50% { box-shadow: 0 0 20px rgba(0,212,255,0.9); } }
+    .warrior .profile-btn { margin-top: 22px; align-self: flex-start; font-family: var(--font-px); font-size: 9px;
+      color: #000; background: var(--cyan); border: 2px solid #000; padding: 12px 16px; cursor: pointer; transition: transform 0.1s ease; }
+    .warrior .profile-btn:hover { transform: translate(2px, 2px); }
+    /* Right — battle record */
+    .battle { display: flex; flex-direction: column; gap: 20px; }
+    .battle .mini-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .battle .mini { padding: 18px 14px; text-align: center; display: flex; flex-direction: column; gap: 9px; align-items: center; }
+    .battle .mini .ico { width: 30px; height: 30px; image-rendering: pixelated; }
+    .battle .mini .diff { font-family: var(--font-px); font-size: 8px; letter-spacing: 1px; }
+    .battle .mini .count { font-family: var(--font-px); font-size: 13px; color: var(--text); }
+    .battle .mini .lab { font-family: var(--font-px); font-size: 6px; color: var(--muted); letter-spacing: 1px; }
+    .battle .mini .bar { width: 100%; height: 10px; background: #050811; border: 2px solid var(--border); padding: 1px; }
+    .battle .mini .bar i { display: block; height: 100%; }
+    .battle .mini.easy .diff { color: var(--lc-easy); } .battle .mini.easy .bar i { background: var(--lc-easy); width: 85%; }
+    .battle .mini.med .diff  { color: var(--lc-med); }  .battle .mini.med .bar i  { background: var(--lc-med); width: 78%; }
+    .battle .mini.hard .diff { color: var(--lc-hard); } .battle .mini.hard .bar i { background: var(--lc-hard); width: 46%; }
+    /* Recent battles terminal */
+    .battle .recent { background: #03060f; border: var(--px) solid #000; box-shadow: 0 0 0 var(--px) var(--cyan); overflow: hidden; }
+    .battle .recent .rhead { background: #0a1020; padding: 10px 14px; font-family: var(--font-px); font-size: 8px; color: var(--cyan); }
+    .battle .recent .rbody { padding: 8px 0; }
+    .battle .recent .rrow { display: grid; grid-template-columns: 18px 1fr auto auto; gap: 12px; align-items: center;
+      font-family: var(--font-mono, 'Courier New', monospace); font-size: 12px; padding: 8px 16px; transition: background 0.12s ease; }
+    .battle .recent .rrow:hover { background: rgba(0,212,255,0.06); }
+    .battle .recent .rrow .chk { color: var(--lc-easy); }
+    .battle .recent .rrow .name { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .battle .recent .rrow .lvl { font-family: var(--font-px); font-size: 6px; letter-spacing: 1px; }
+    .battle .recent .rrow .xp { font-family: var(--font-px); font-size: 7px; color: var(--gold); white-space: nowrap; }
+    .battle .recent .rrow.easy .lvl { color: var(--lc-easy); }
+    .battle .recent .rrow.med .lvl  { color: var(--lc-med); }
+    .battle .recent .rrow.hard .lvl { color: var(--lc-hard); }
+
+    /* ============================================================
+       ACHIEVEMENTS
+    ============================================================ */
+    .feed { display: flex; flex-direction: column; gap: 18px; max-width: 760px; margin: 0 auto; }
+    .ach { display: flex; align-items: center; gap: 18px; padding: 18px 22px; }
+    .ach .badge { width: 52px; height: 52px; flex-shrink: 0; background: var(--card-2); border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: var(--font-px); font-size: 14px; color: var(--gold); }
+    .ach .info h4 { font-family: var(--font-px); font-size: 10px; color: var(--cyan); margin-bottom: 6px; line-height: 1.6; }
+    .ach .info span { font-family: var(--font-px); font-size: 7px; color: var(--muted); line-height: 1.6; }
+    .ach .date { margin-left: auto; font-family: var(--font-px); font-size: 8px; color: var(--cyan); white-space: nowrap; }
+
+    /* ============================================================
+       CONTACT — TERMINAL
+    ============================================================ */
+    .terminal {
+      max-width: 720px; margin: 0 auto; background: #03060f;
+      border: var(--px) solid #000; box-shadow: 0 0 0 var(--px) var(--green);
+      padding: 0; overflow: hidden; font-family: var(--font-px);
+    }
+    .terminal .bar { background: #0a1020; padding: 10px 14px; display: flex; gap: 8px; align-items: center; }
+    .terminal .bar i { width: 11px; height: 11px; display: inline-block; }
+    .terminal .bar .r { background: #ff5f56; } .terminal .bar .y { background: #ffbd2e; } .terminal .bar .g { background: #27c93f; }
+    .terminal .bar span { font-size: 8px; color: var(--muted); margin-left: 8px; }
+    .terminal .body { padding: 24px; color: var(--green); font-size: 10px; line-height: 2.2; }
+    .terminal .body .head { color: var(--cyan); margin-bottom: 14px; }
+    .terminal form { display: flex; flex-direction: column; gap: 16px; margin-top: 8px; }
+    .terminal label { display: block; font-size: 9px; color: var(--green); margin-bottom: 8px; }
+    .terminal input, .terminal textarea {
+      width: 100%; background: #060b16; border: 2px solid #14361f; color: var(--green);
+      font-family: var(--font-px); font-size: 10px; padding: 12px; outline: none;
+    }
+    .terminal input:focus, .terminal textarea:focus { border-color: var(--green); }
+    .terminal .send { align-self: flex-start; background: var(--green); color: #000; border: 2px solid #000; font-family: var(--font-px); font-size: 10px; padding: 12px 18px; cursor: pointer; }
+    .cursor { display: inline-block; width: 8px; height: 14px; background: var(--green); animation: blink 1s steps(2) infinite; vertical-align: middle; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .socials { display: flex; gap: 14px; justify-content: center; margin-top: 32px; }
+    .socials a { font-family: var(--font-px); font-size: 9px; color: var(--cyan); border: 2px solid var(--cyan); padding: 12px 16px; transition: all 0.15s ease; }
+    .socials a:hover { background: var(--cyan); color: #000; }
+
+    footer { text-align: center; padding: 32px; font-family: var(--font-px); font-size: 8px; color: var(--muted); border-top: 2px solid var(--border); }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 760px) {
+      .training-grid { grid-template-columns: 1fr; }
+      .battle .mini-row { grid-template-columns: 1fr; }
+      #orb-canvas { min-height: 300px; }
+      nav .links { display: none; }
+      nav .links.open {
+        display: flex; flex-direction: column; position: absolute;
+        top: 100%; left: 0; right: 0; background: rgba(10,14,26,0.97);
+        padding: 12px; border-bottom: 2px solid var(--border);
+      }
+      .nav-toggle { display: block; }
+      nav .xp { display: none; }
+      /* HERO — single column vertical layout on mobile */
+      #hero { height: auto; min-height: 100vh; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-left { padding: 24px 18px 8px; }
+      .hero-right { padding: 8px 18px 80px; }
+      .player-card { width: 100%; margin: 0 auto; }
+      /* hide cityscape parallax + corner panels for performance/space */
+      .city, .hud-br { display: none; }
+    }
+
+    /* ============================================================
+       SCROLL COMPANION SAMURAI
+    ============================================================ */
+    .companion-container {
+      position: fixed;
+      bottom: 0px;
+      left: 20px;
+      z-index: 9999;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .companion-bubble {
+      background: #0a0e1a;
+      border: 2px solid #00d4ff;
+      padding: 8px 10px;
+      font-family: var(--font-px);
+      font-size: 7px;
+      color: #00d4ff;
+      max-width: 160px;
+      line-height: 1.8;
+      text-align: center;
+      white-space: pre-line;
+      margin-bottom: 6px;
+      position: relative;
+      transition: opacity 0.2s ease;
+    }
+    .companion-bubble::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: #00d4ff;
+    }
+    .companion-sprite {
+      width: 192px;
+      height: 192px;
+      pointer-events: auto;
+      cursor: pointer;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      mix-blend-mode: screen;
+      transform-origin: center bottom;
+      background-repeat: no-repeat;
+      background-size: auto 192px;
+      position: relative;
+    }
+    .companion-xp-toast {
+      position: absolute;
+      bottom: 96px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #f5c518;
+      font-family: var(--font-px);
+      font-size: 7px;
+      pointer-events: none;
+      animation: companion-float 1s ease-out forwards;
+    }
+    @keyframes companion-float {
+      from { transform: translate(-50%, 0); opacity: 1; }
+      to   { transform: translate(-50%, -30px); opacity: 0; }
+    }
+
+    .anim-idle {
+      background-image: url('public/sprites/IDLE.png');
+      animation: play-idle 1s steps(10) infinite;
+    }
+    @keyframes play-idle {
+      from { background-position: 0px 0px; }
+      to   { background-position: -1920px 0px; }
+    }
+    .anim-run {
+      background-image: url('public/sprites/RUN.png');
+      animation: play-run 0.8s steps(16) infinite;
+    }
+    @keyframes play-run {
+      from { background-position: 0px 0px; }
+      to   { background-position: -3072px 0px; }
+    }
+    .anim-attack {
+      background-image: url('public/sprites/ATTACK_1.png');
+      animation: play-attack 0.7s steps(7) forwards;
+    }
+    @keyframes play-attack {
+      from { background-position: 0px 0px; }
+      to   { background-position: -1344px 0px; }
+    }
+    .anim-hurt {
+      background-image: url('public/sprites/HURT.png');
+      animation: play-hurt 0.4s steps(4) forwards;
+    }
+    @keyframes play-hurt {
+      from { background-position: 0px 0px; }
+      to   { background-position: -768px 0px; }
+    }
+
+    @media (max-width: 768px) {
+      .companion-container { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- LOADER -->
+  <div id="loader">
+    <div class="title px">LOADING<span class="cursor"></span></div>
+    <div class="bar-wrap"><div class="bar" id="loadBar"></div></div>
+    <div class="pct" id="loadPct">0%</div>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <a class="brand" href="#hero">NILESH.EXE</a>
+    <button class="nav-toggle" id="navToggle">MENU</button>
+    <div class="links" id="navLinks">
+      <a href="#hero">HOME</a>
+      <a href="#skills">SKILLS</a>
+      <a href="#training">TRAINING</a>
+      <a href="#quests">QUESTS</a>
+      <a href="#achievements">ACHIEVEMENTS</a>
+      <a href="#contact">CO-OP</a>
+    </div>
+    <div class="xp">
+      <span>XP</span>
+      <div class="xp-bar"><div class="xp-fill" id="navXp"></div></div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="stars"></div>
+    <div class="city city-1" data-depth="0.02"></div>
+    <div class="city city-2" data-depth="0.05"></div>
+    <div class="city city-3" data-depth="0.08"></div>
+
+    <!-- floating cyan diamonds -->
+    <div class="diamonds">
+      <i style="left:12%; animation-duration:14s; animation-delay:0s;"></i>
+      <i style="left:24%; animation-duration:18s; animation-delay:3s;"></i>
+      <i style="left:42%; animation-duration:16s; animation-delay:6s;"></i>
+      <i style="left:58%; animation-duration:20s; animation-delay:1s;"></i>
+      <i style="left:71%; animation-duration:15s; animation-delay:8s;"></i>
+      <i style="left:85%; animation-duration:19s; animation-delay:4s;"></i>
+      <i style="left:93%; animation-duration:17s; animation-delay:10s;"></i>
+    </div>
+
+    <!-- corner HUD -->
+    <div class="hud hud-tl"><div class="label"><span class="hud-dot"></span>// PLAYER_DATA</div></div>
+    <div class="hud hud-tr"><div class="session">SESSION: ACTIVE</div></div>
+    <div class="hud hud-br">
+      <div class="sys-row"><span class="k">CPU</span><span>[████░░]</span><span class="pct">67%</span></div>
+      <div class="sys-row"><span class="k">RAM</span><span>[███░░░]</span><span class="pct">54%</span></div>
+      <div class="sys-row"><span class="k">XP</span><span>[██░░░░]</span><span class="pct">32%</span></div>
+    </div>
+
+    <div class="hero-grid">
+      <!-- LEFT COLUMN -->
+      <div class="hero-left">
+        <div class="player-card pixel-box reveal">
+          <div class="avatar">P1</div>
+          <div class="ptag">PLAYER_01</div>
+          <div class="name-wrap"><h1>NILESH</h1><span class="cursor"></span></div>
+          <div class="row"><span>CLASS</span><span class="cyan">FULL-STACK ENG. / AI-ML EXPLORER</span></div>
+          <div class="row"><span>LEVEL</span><span class="gold">LVL 4  ·  FINAL YEAR</span></div>
+          <div class="row"><span>GUILD</span><span>SSN CE  ·  B.TECH IT</span></div>
+          <div class="xp-label">XP — PLACEMENT SEASON 2026</div>
+          <div class="xpbar"><i id="hero-xp"></i></div>
+          <button class="start-btn" onclick="document.getElementById('quests').scrollIntoView()">▶ START</button>
+          <div class="stat-badges">
+            <span class="badge">⚔️ 320+ PROBLEMS SLAIN</span>
+            <span class="badge">🏆 6TH NATIONALLY</span>
+          </div>
+          <div class="player-socials">
+            <a href="https://github.com/NileshSree1072" target="_blank" rel="noreferrer" aria-label="GitHub">GH</a>
+            <a href="https://linkedin.com/in/nilesh" target="_blank" rel="noreferrer" aria-label="LinkedIn">LI</a>
+            <a href="https://leetcode.com/u/yzbgMujZug" target="_blank" rel="noreferrer" aria-label="LeetCode">LC</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="hero-right">
+        <div id="orb-canvas"></div>
+        <div class="data-chips">
+          <span class="chip">FULL-STACK</span>
+          <span class="chip">AI-ML</span>
+          <span class="chip">ROBOTICS</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="scanlines"></div>
+
+    <!-- recruiter ticker -->
+    <div class="ticker">
+      <div class="track">
+        <span>⚔️ OPEN TO SWE INTERNSHIPS &amp; PLACEMENTS&nbsp;·&nbsp;320+ LEETCODE PROBLEMS&nbsp;·&nbsp;RANKED 6TH NATIONALLY&nbsp;·&nbsp;FULL-STACK&nbsp;·&nbsp;AI-ML&nbsp;·&nbsp;ROBOTICS&nbsp;·&nbsp;B.TECH IT&nbsp;·&nbsp;SSN CE&nbsp;·&nbsp;</span>
+        <span>⚔️ OPEN TO SWE INTERNSHIPS &amp; PLACEMENTS&nbsp;·&nbsp;320+ LEETCODE PROBLEMS&nbsp;·&nbsp;RANKED 6TH NATIONALLY&nbsp;·&nbsp;FULL-STACK&nbsp;·&nbsp;AI-ML&nbsp;·&nbsp;ROBOTICS&nbsp;·&nbsp;B.TECH IT&nbsp;·&nbsp;SSN CE&nbsp;·&nbsp;</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <canvas id="constellation"></canvas>
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">// SYSTEM</div>
+        <h2>ABILITY TREE</h2>
+        <p>&gt; HOVER NODE TO INSPECT SKILL DATA. CYAN NODES = UNLOCKED.</p>
+      </div>
+      <div class="tree reveal" id="tree"></div>
+    </div>
+  </section>
+
+  <!-- TRAINING GROUNDS (LeetCode stats — placeholder data) -->
+  <!-- TODO: Replace placeholder data with live LeetCode stats
+       Public GraphQL endpoint: https://leetcode.com/graphql
+       Query: userPublicProfile + userProblemsSolved for username "nilesh_narayanan" -->
+  <section id="training">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">// DOJO</div>
+        <h2>TRAINING_GROUNDS</h2>
+        <p id="lc-feed-status">&gt; DAILY GRIND. SHARPENING THE BLADE.</p>
+      </div>
+
+      <div class="training-grid reveal">
+        <!-- LEFT: Warrior stats card -->
+        <div class="warrior pixel-box">
+          <div class="class-tag">
+            <svg class="sword" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+              <rect x="9" y="1" width="2" height="2" fill="#cdd6f4"/>
+              <rect x="8" y="2" width="2" height="2" fill="#cdd6f4"/>
+              <rect x="7" y="3" width="2" height="2" fill="#cdd6f4"/>
+              <rect x="6" y="4" width="2" height="2" fill="#cdd6f4"/>
+              <rect x="5" y="5" width="2" height="2" fill="#cdd6f4"/>
+              <rect x="4" y="6" width="2" height="2" fill="#cdd6f4"/>
+              <rect x="2" y="8" width="4" height="2" fill="#f5c518"/>
+              <rect x="3" y="7" width="2" height="2" fill="#cdd6f4"/>
+              <rect x="1" y="9" width="2" height="2" fill="#a07814"/>
+              <rect x="3" y="9" width="2" height="3" fill="#a07814"/>
+            </svg>
+            CODER CLASS: KNIGHT
+          </div>
+          <div class="stat"><span class="k">RANK</span><span class="v" id="lc-rank">Knight III</span></div>
+          <div class="stat"><span class="k">PROBLEMS</span><span class="v" id="lc-problems">320 Solved</span></div>
+          <div class="stat"><span class="k">STREAK</span><span class="v hot" id="lc-streak">12 Days</span></div>
+          <div class="stat"><span class="k">CONTEST</span><span class="v">1580 Rating</span></div>
+          <div class="stat"><span class="k">ACCEPTANCE</span><span class="v">63.4%</span></div>
+          <div class="nextrank" id="lc-status">NEXT RANK: GUARDIAN<br/>180 XP NEEDED</div>
+          <div class="xpbar"><i id="lc-xp"></i></div>
+          <a class="profile-btn" href="https://leetcode.com/u/nilesh_sree/" target="_blank" rel="noopener">VIEW PROFILE →</a>
+        </div>
+
+        <!-- RIGHT: Battle record -->
+        <div class="battle">
+          <div class="mini-row">
+            <div class="mini easy pixel-box">
+              <svg class="ico" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+                <rect x="3" y="2" width="10" height="2" fill="#00b894"/>
+                <rect x="2" y="4" width="12" height="6" fill="#00b894"/>
+                <rect x="3" y="10" width="10" height="2" fill="#00b894"/>
+                <rect x="5" y="12" width="6" height="2" fill="#00b894"/>
+                <rect x="7" y="14" width="2" height="1" fill="#00b894"/>
+                <rect x="6" y="5" width="4" height="2" fill="#03060f"/>
+                <rect x="7" y="6" width="2" height="3" fill="#03060f"/>
+              </svg>
+              <div class="diff">EASY</div>
+              <div class="count" id="lc-easy-count">127 / 150</div>
+              <div class="lab">CLEARED</div>
+              <div class="bar"><i id="lc-easy-bar"></i></div>
+            </div>
+            <div class="mini med pixel-box">
+              <svg class="ico" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+                <rect x="12" y="1" width="2" height="2" fill="#f5c518"/>
+                <rect x="2" y="1" width="2" height="2" fill="#f5c518"/>
+                <rect x="3" y="3" width="2" height="2" fill="#f5c518"/><rect x="11" y="3" width="2" height="2" fill="#f5c518"/>
+                <rect x="5" y="5" width="2" height="2" fill="#f5c518"/><rect x="9" y="5" width="2" height="2" fill="#f5c518"/>
+                <rect x="7" y="7" width="2" height="2" fill="#f5c518"/>
+                <rect x="5" y="9" width="2" height="2" fill="#f5c518"/><rect x="9" y="9" width="2" height="2" fill="#f5c518"/>
+                <rect x="3" y="11" width="2" height="2" fill="#a07814"/><rect x="11" y="11" width="2" height="2" fill="#a07814"/>
+                <rect x="2" y="13" width="3" height="2" fill="#a07814"/><rect x="11" y="13" width="3" height="2" fill="#a07814"/>
+              </svg>
+              <div class="diff">MEDIUM</div>
+              <div class="count" id="lc-med-count">156 / 200</div>
+              <div class="lab">IN PROGRESS</div>
+              <div class="bar"><i id="lc-med-bar"></i></div>
+            </div>
+            <div class="mini hard pixel-box">
+              <svg class="ico" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+                <rect x="4" y="2" width="8" height="2" fill="#ff4757"/>
+                <rect x="3" y="4" width="10" height="5" fill="#ff4757"/>
+                <rect x="5" y="5" width="2" height="2" fill="#03060f"/><rect x="9" y="5" width="2" height="2" fill="#03060f"/>
+                <rect x="7" y="7" width="2" height="2" fill="#03060f"/>
+                <rect x="4" y="9" width="2" height="2" fill="#ff4757"/><rect x="7" y="9" width="2" height="2" fill="#ff4757"/><rect x="10" y="9" width="2" height="2" fill="#ff4757"/>
+                <rect x="4" y="11" width="1" height="2" fill="#ff4757"/><rect x="7" y="11" width="2" height="3" fill="#ff4757"/><rect x="11" y="11" width="1" height="2" fill="#ff4757"/>
+              </svg>
+              <div class="diff">HARD</div>
+              <div class="count" id="lc-hard-count">37 / 80</div>
+              <div class="lab">ACTIVE GRIND</div>
+              <div class="bar"><i id="lc-hard-bar"></i></div>
+            </div>
+          </div>
+
+          <div class="recent">
+            <div class="rhead">&gt; RECENT_ACTIVITY</div>
+            <div class="rbody">
+              <div class="rrow easy"><span class="chk">✓</span><span class="name">Two Sum</span><span class="lvl">EASY</span><span class="xp">+10 XP</span></div>
+              <div class="rrow med"><span class="chk">✓</span><span class="name">LRU Cache</span><span class="lvl">MEDIUM</span><span class="xp">+25 XP</span></div>
+              <div class="rrow hard"><span class="chk">✓</span><span class="name">Word Break II</span><span class="lvl">HARD</span><span class="xp">+50 XP</span></div>
+              <div class="rrow hard"><span class="chk">✓</span><span class="name">Sliding Window Maximum</span><span class="lvl">HARD</span><span class="xp">+50 XP</span></div>
+              <div class="rrow med"><span class="chk">✓</span><span class="name">Top K Frequent Elements</span><span class="lvl">MEDIUM</span><span class="xp">+25 XP</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="quests" style="background:var(--bg-2);">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">// MISSIONS</div>
+        <h2>QUEST LOG</h2>
+        <p>&gt; COMPLETED BUILDS &amp; ACTIVE MISSIONS. DIFFICULTY RATED IN STARS.</p>
+      </div>
+      <div class="quests reveal" id="quests-grid"></div>
+    </div>
+  </section>
+
+  <!-- ACHIEVEMENTS -->
+  <section id="achievements">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">// UNLOCKED</div>
+        <h2>ACHIEVEMENTS</h2>
+        <p>&gt; MILESTONES LOGGED. BADGES EARNED. GRIND RECORDED.</p>
+      </div>
+      <div class="feed reveal" id="feed"></div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" style="background:var(--bg-2);">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">// NETWORK</div>
+        <h2>CO-OP INVITE</h2>
+      </div>
+      <div class="terminal reveal">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>nilesh@portfolio: ~/contact</span></div>
+        <div class="body">
+          <div class="head">&gt; INITIATE_CONNECTION<span class="cursor"></span></div>
+          <form onsubmit="event.preventDefault(); this.reset(); alert('TRANSMISSION SENT ✓');">
+            <div><label>$ name --your-handle</label><input required placeholder="player_name" /></div>
+            <div><label>$ email --reply-to</label><input type="email" required placeholder="you@domain.com" /></div>
+            <div><label>$ message --payload</label><textarea rows="4" required placeholder="TYPE_MESSAGE . . ."></textarea></div>
+            <button class="send" type="submit">[ SEND_TRANSMISSION ]</button>
+          </form>
+        </div>
+      </div>
+      <div class="socials reveal">
+        <a href="https://github.com" target="_blank" rel="noopener">[ GITHUB ]</a>
+        <a href="https://linkedin.com" target="_blank" rel="noopener">[ LINKEDIN ]</a>
+        <a href="mailto:nilesh@example.com">[ EMAIL ]</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>© 2026 NILESH — PRESS START TO CONTINUE</footer>
+
+  <!-- ============================================================
+       SCROLL COMPANION SAMURAI
+  ============================================================ -->
+  <div class="companion-container" id="companion">
+    <div class="companion-bubble" id="companionBubble">ANOTHER WARRIOR
+ARRIVES...
+WELCOME. ⚔️</div>
+    <div class="companion-sprite anim-idle" id="companionSprite" aria-label="Samurai companion"></div>
+  </div>
+
+  <script>
+    /* ---------- LOADER ---------- */
+    (function () {
+      let p = 0;
+      const bar = document.getElementById('loadBar');
+      const pct = document.getElementById('loadPct');
+      const t = setInterval(() => {
+        p += Math.random() * 12;
+        if (p >= 100) { p = 100; clearInterval(t); setTimeout(() => document.getElementById('loader').classList.add('done'), 250); }
+        bar.style.width = p + '%';
+        pct.textContent = Math.floor(p) + '%';
+      }, 120);
+    })();
+
+    /* ---------- NAV TOGGLE ---------- */
+    document.getElementById('navToggle').addEventListener('click', () =>
+      document.getElementById('navLinks').classList.toggle('open'));
+
+    /* ---------- PARALLAX CITY ---------- */
+    document.addEventListener('mousemove', (e) => {
+      const cx = (e.clientX / window.innerWidth - 0.5);
+      document.querySelectorAll('.city').forEach(el => {
+        const d = parseFloat(el.dataset.depth) * 100;
+        el.style.transform = `translateX(${cx * d}px)`;
+      });
+    });
+
+    /* ---------- XP ON SCROLL ---------- */
+    const navXp = document.getElementById('navXp');
+    window.addEventListener('scroll', () => {
+      const max = document.body.scrollHeight - window.innerHeight;
+      const pctv = Math.min(100, (window.scrollY / max) * 100);
+      navXp.style.width = Math.max(5, pctv) + '%';
+    });
+
+    /* ---------- REVEAL OBSERVER ---------- */
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(en => { if (en.isIntersecting) en.target.classList.add('in'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    /* ---------- DATA: SKILLS ---------- */
+    const SKILLS = [
+      { cat: 'Languages', items: [
+        { name: 'Python', lvl: 'MASTERED', on: true, desc: 'Primary weapon for backend, AI/ML and scripting.' },
+        { name: 'C++', lvl: 'PROFICIENT', on: true, desc: 'Used for robotics, DSA and performance-critical code.' },
+        { name: 'Java', lvl: 'PROFICIENT', on: true, desc: 'Backend services and Spring Boot applications.' },
+        { name: 'JavaScript', lvl: 'PROFICIENT', on: true, desc: 'Full-stack web logic across React and Node.' },
+      ]},
+      { cat: 'Backend', items: [
+        { name: 'FastAPI', lvl: 'MASTERED', on: true, desc: 'High-throughput Python APIs with async endpoints.' },
+        { name: 'Spring Boot', lvl: 'PROFICIENT', on: true, desc: 'Concurrency-safe Java services with atomic ops.' },
+        { name: 'Redis', lvl: 'PROFICIENT', on: true, desc: 'Caching, rate limiting and atomic Lua scripting.' },
+        { name: 'PostgreSQL', lvl: 'PROFICIENT', on: true, desc: 'Relational data modelling and tuned queries.' },
+      ]},
+      { cat: 'Frontend', items: [
+        { name: 'React', lvl: 'PROFICIENT', on: true, desc: 'Component-driven UIs with hooks and state.' },
+        { name: 'Next.js', lvl: 'PROFICIENT', on: true, desc: 'Full-stack apps with SSR and server actions.' },
+        { name: 'Tailwind', lvl: 'PROFICIENT', on: true, desc: 'Utility-first styling for rapid UI builds.' },
+      ]},
+      { cat: 'DevOps', items: [
+        { name: 'AWS', lvl: 'LEARNING', on: true, desc: 'Deploying and scaling cloud infrastructure.' },
+        { name: 'Docker', lvl: 'PROFICIENT', on: true, desc: 'Containerizing services for reproducible deploys.' },
+        { name: 'Kubernetes', lvl: 'LOCKED', on: false, desc: 'Orchestration skill not yet unlocked.' },
+      ]},
+      { cat: 'AI / ML', items: [
+        { name: 'LangChain', lvl: 'PROFICIENT', on: true, desc: 'Building RAG pipelines and LLM-powered apps.' },
+        { name: 'FAISS / RAG', lvl: 'PROFICIENT', on: true, desc: 'Vector search over documents for retrieval Q&A.' },
+        { name: 'PyTorch', lvl: 'LEARNING', on: true, desc: 'Training and fine-tuning neural networks.' },
+      ]},
+      { cat: 'Robotics', items: [
+        { name: 'ROS', lvl: 'PROFICIENT', on: true, desc: 'Robot control and autonomous navigation stacks.' },
+        { name: 'Embedded C', lvl: 'PROFICIENT', on: true, desc: 'Low-level firmware for microcontrollers.' },
+      ]},
+    ];
+    document.getElementById('tree').innerHTML = SKILLS.map(b => `
+      <div class="branch">
+        <div class="branch-title">${b.cat}</div>
+        <div class="connector"></div>
+        ${b.items.map(i => `
+          <div class="node ${i.on ? 'unlocked' : 'locked'}"
+               data-name="${i.name}" data-lvl="${i.lvl}" data-desc="${i.desc}">
+            <div class="icon">${i.on ? '◆' : 'X'}</div>
+            <div class="label">${i.name}</div>
+          </div>`).join('<div class="connector"></div>')}
+      </div>`).join('');
+
+    /* ---------- SKILL NODE TOOLTIP ---------- */
+    (function skillTip() {
+      const tip = document.createElement('div');
+      tip.id = 'skill-tip';
+      tip.innerHTML = '<div class="tip-name"></div><div class="tip-badge"></div><div class="tip-desc"></div>';
+      document.body.appendChild(tip);
+      const nameEl = tip.querySelector('.tip-name');
+      const badgeEl = tip.querySelector('.tip-badge');
+      const descEl = tip.querySelector('.tip-desc');
+
+      function place(e) {
+        const pad = 14;
+        let x = e.clientX + 16, y = e.clientY + 16;
+        const r = tip.getBoundingClientRect();
+        if (x + r.width + pad > window.innerWidth) x = e.clientX - r.width - 16;
+        if (y + r.height + pad > window.innerHeight) y = e.clientY - r.height - 16;
+        tip.style.left = Math.max(pad, x) + 'px';
+        tip.style.top = Math.max(pad, y) + 'px';
+      }
+
+      document.querySelectorAll('.node').forEach(node => {
+        node.addEventListener('mouseenter', (e) => {
+          const lvl = node.dataset.lvl || '';
+          nameEl.textContent = node.dataset.name || '';
+          badgeEl.textContent = lvl;
+          badgeEl.className = 'tip-badge ' + lvl.toLowerCase();
+          descEl.textContent = node.dataset.desc || '[ NO DATA FOUND ]';
+          place(e);
+          tip.classList.add('show');
+        });
+        node.addEventListener('mousemove', place);
+        node.addEventListener('mouseleave', () => tip.classList.remove('show'));
+      });
+    })();
+
+    /* ---------- DATA: QUESTS ---------- */
+    const QUESTS = [
+      { t:'Resolve', d:6, desc:'AI HELPDESK & TICKETING SYSTEM · pgvector DUPLICATE DETECTION · REAL-TIME WEBSOCKET NOTIFICATIONS · SLA BREACH MONITORING.', tags:['Spring Boot','React','pgvector','Azure OpenAI','Groq'], link:'project_complete_overview.html' },
+      { t:'ApartiBot', d:6, desc:'AUTONOMOUS DELIVERY + SECURITY BOT. RANKED 6TH NATIONALLY.', tags:['C++','ROS'], link:'#' },
+      { t:'Insurance Policy RAG Chatbot', d:5, desc:'RAG PIPELINE OVER INSURANCE PDFS · FAISS VECTOR STORE · CLAUSE-LEVEL Q&A · GROUNDED RESPONSES CUT LLM HALLUCINATIONS · MULTI-DOC CROSS-POLICY COMPARISON.', tags:['Python','LangChain','FAISS','LLM APIs'], link:'#' },
+      { t:'URL Shortener', d:4, desc:'URL SHORTENER · JWT AUTH · REDIS CACHE · ANALYTICS DASHBOARD.', tags:['FastAPI','Redis','Supabase','React'], link:'#' },
+      { t:'EzDelivery', d:5, desc:'FULL-STACK DELIVERY PLATFORM · AWS · RAZORPAY · MONGODB.', tags:['Next.js','MongoDB','AWS','Razorpay'], link:'#' },
+    ];
+    const star = n => '★'.repeat(n) + '☆'.repeat(6-n);
+    document.getElementById('quests-grid').innerHTML = QUESTS.map(q => `
+      <div class="quest pixel-box">
+        <div class="qhead"><h3>${q.t.toUpperCase()}</h3><div class="stars">${'⭐'.repeat(Math.min(3, Math.ceil(q.d/2)))}</div></div>
+        <p>${q.desc}</p>
+        <div class="tags">${q.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+        <a class="qbtn" href="${q.link}" target="_blank" rel="noopener">VIEW QUEST →</a>
+      </div>`).join('');
+
+    /* ---------- DATA: ACHIEVEMENTS ---------- */
+    const ACH = [
+      { i:'🎓', t:'SSN COLLEGE OF ENGINEERING', org:'B.TECH IT · FINAL YEAR', date:'2026' },
+      { i:'🏅', t:'PSG POLYTECHNIC · 9.3 CGPA', org:'DIPLOMA IN COMPUTER ENGINEERING', date:'2023' },
+      { i:'🚀', t:'SNUC HACKS 2026', org:'HACKATHON', date:'2026' },
+      { i:'🏆', t:'6TH NATIONALLY · APARTIBOT', org:'NATIONAL PROJECT COMP · SMVEC · 80+ TEAMS', date:'2024' },
+    ];
+    document.getElementById('feed').innerHTML = ACH.map(a => `
+      <div class="ach pixel-box">
+        <div class="badge">${a.i}</div>
+        <div class="info"><h4>${a.t}</h4><span>${a.org}</span></div>
+        <div class="date">${a.date}</div>
+      </div>`).join('');
+
+    /* ---------- LIVE LEETCODE STATS ---------- */
+    (function leetcode() {
+      const USERNAME = 'nilesh_sree';
+      const status = document.getElementById('lc-feed-status');
+      const $ = id => document.getElementById(id);
+
+      // Loading state
+      status.textContent = 'FETCHING DATA . . .';
+
+      const setFill = (el, pct) => { if (el) el.style.width = Math.max(0, Math.min(100, pct)) + '%'; };
+
+      function render(d) {
+        // d: { easy, easyTotal, med, medTotal, hard, hardTotal, total, ranking, streak }
+        $('lc-easy-count').textContent = `${d.easy} / ${d.easyTotal}`;
+        $('lc-med-count').textContent  = `${d.med} / ${d.medTotal}`;
+        $('lc-hard-count').textContent = `${d.hard} / ${d.hardTotal}`;
+        setFill($('lc-easy-bar'), d.easyTotal ? (d.easy / d.easyTotal) * 100 : 0);
+        setFill($('lc-med-bar'),  d.medTotal  ? (d.med  / d.medTotal)  * 100 : 0);
+        setFill($('lc-hard-bar'), d.hardTotal ? (d.hard / d.hardTotal) * 100 : 0);
+
+        if (d.ranking) $('lc-rank').textContent = 'RANK #' + d.ranking;
+        $('lc-problems').textContent = d.total + ' Solved';
+        if (d.streak != null) $('lc-streak').textContent = d.streak + ' Days';
+
+        const xpPct = Math.min(100, (d.total / 500) * 100);
+        setFill($('lc-xp'), xpPct);
+        setFill($('hero-xp'), xpPct);
+
+        status.textContent = '> DAILY GRIND. SHARPENING THE BLADE.';
+      }
+
+      function offline() {
+        status.textContent = 'API UNREACHABLE — OFFLINE MODE';
+      }
+
+      // Try direct LeetCode GraphQL first, fall back to public proxy.
+      const query = `query getUserStats($username: String!) {
+        matchedUser(username: $username) {
+          submitStats { acSubmissionNum { difficulty count } }
+          userCalendar { streak totalActiveDays }
+          profile { ranking reputation }
+        }
+        allQuestionsCount { difficulty count }
+      }`;
+
+      fetch('https://leetcode.com/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables: { username: USERNAME } })
+      })
+        .then(r => { if (!r.ok) throw new Error('graphql ' + r.status); return r.json(); })
+        .then(json => {
+          const u = json && json.data && json.data.matchedUser;
+          if (!u) throw new Error('no matchedUser');
+          const ac = {};
+          u.submitStats.acSubmissionNum.forEach(s => { ac[s.difficulty] = s.count; });
+          const all = {};
+          json.data.allQuestionsCount.forEach(s => { all[s.difficulty] = s.count; });
+          const easy = ac.Easy || 0, med = ac.Medium || 0, hard = ac.Hard || 0;
+          render({
+            easy, med, hard,
+            easyTotal: all.Easy || 0, medTotal: all.Medium || 0, hardTotal: all.Hard || 0,
+            total: easy + med + hard,
+            ranking: u.profile && u.profile.ranking,
+            streak: u.userCalendar && u.userCalendar.streak
+          });
+        })
+        .catch(err => {
+          console.log('[v0] LeetCode GraphQL failed, trying proxy:', err.message);
+          // Fallback proxy returns aggregate JSON with per-difficulty totals
+          fetch('https://alfa-leetcode-api.onrender.com/userProfile/' + USERNAME)
+            .then(r => { if (!r.ok) throw new Error('proxy ' + r.status); return r.json(); })
+            .then(p => {
+              if (p.errors) throw new Error('proxy error');
+              render({
+                easy: p.easySolved || 0, med: p.mediumSolved || 0, hard: p.hardSolved || 0,
+                easyTotal: p.totalEasy || 0, medTotal: p.totalMedium || 0, hardTotal: p.totalHard || 0,
+                total: p.totalSolved || ((p.easySolved||0)+(p.mediumSolved||0)+(p.hardSolved||0)),
+                ranking: p.ranking,
+                streak: p.streak
+              });
+            })
+            .catch(err2 => {
+              console.log('[v0] LeetCode proxy failed:', err2.message);
+              offline(); // keep placeholder values silently
+            });
+        });
+    })();
+  </script>
+
+  <!-- ============================================================
+       PHASE 2 — THREE.JS HERO ORB
+  ============================================================ -->
+  <script type="importmap">
+  { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+
+    const mount = document.getElementById('orb-canvas');
+    const fallback = document.createElement('div');
+    fallback.className = 'orb-fallback';
+    fallback.textContent = 'LOADING CORE...';
+    mount.appendChild(fallback);
+
+    function initOrb() {
+      let W = mount.clientWidth, H = mount.clientHeight;
+      if (!W || !H) { requestAnimationFrame(initOrb); return; }
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(65, W / H, 0.1, 1000);
+      camera.position.z = 8;
+
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(W, H);
+      mount.appendChild(renderer.domElement);
+      fallback.remove();
+
+      const COLORS = { cyan: 0x00d4ff, gold: 0xf5c518, green: 0x39ff7a };
+
+      // Core: low-poly wireframe icosahedron
+      const coreGeo = new THREE.IcosahedronGeometry(2.2, 1);
+      const wire = new THREE.LineSegments(
+        new THREE.WireframeGeometry(coreGeo),
+        new THREE.LineBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.85 })
+      );
+      scene.add(wire);
+
+      // Inner solid faceted glow
+      const inner = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(1.43, 0),
+        new THREE.MeshStandardMaterial({
+          color: 0x0a1a3a, emissive: COLORS.cyan, emissiveIntensity: 0.35,
+          metalness: 0.6, roughness: 0.3, flatShading: true,
+          transparent: true, opacity: 0.9
+        })
+      );
+      scene.add(inner);
+
+      // Lights
+      scene.add(new THREE.AmbientLight(0x223355, 0.8));
+      const key = new THREE.PointLight(COLORS.cyan, 40, 50); key.position.set(4, 3, 5); scene.add(key);
+      const rim = new THREE.PointLight(COLORS.gold, 20, 50); rim.position.set(-5, -3, 2); scene.add(rim);
+
+      // Orbiting tech spheres
+      const TECH = [
+        { c: COLORS.cyan }, { c: COLORS.gold }, { c: COLORS.green },
+        { c: COLORS.cyan }, { c: COLORS.gold }
+      ];
+      const orbiters = [];
+      const orbitGroup = new THREE.Group();
+      scene.add(orbitGroup);
+      TECH.forEach((t, i) => {
+        const m = new THREE.Mesh(
+          new THREE.SphereGeometry(0.18, 12, 12),
+          new THREE.MeshBasicMaterial({ color: t.c })
+        );
+        const halo = new THREE.Mesh(
+          new THREE.SphereGeometry(0.29, 12, 12),
+          new THREE.MeshBasicMaterial({ color: t.c, transparent: true, opacity: 0.18 })
+        );
+        m.add(halo);
+        const g = new THREE.Group();
+        g.add(m);
+        const radius = 3.2 + (i % 2) * 0.2;
+        // Distinct orbital tilt per sphere -> spherical shell, not a flat disc
+        g.rotation.x = (i / TECH.length) * Math.PI * 0.9 + 0.3;
+        g.rotation.y = i * (Math.PI / 5);
+        g.rotation.z = (i % 3) * 0.4;
+        m.position.x = radius;
+        m.userData = { speed: 0.4 + i * 0.12, radius, phase: i * 1.3 };
+        orbitGroup.add(g);
+        orbiters.push(m);
+      });
+
+      // Starfield points
+      const starCount = 350;
+      const starPos = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount; i++) {
+        const r = 12 + Math.random() * 14;
+        const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+        starPos[i*3]   = r * Math.sin(ph) * Math.cos(th);
+        starPos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
+        starPos[i*3+2] = r * Math.cos(ph);
+      }
+      const stars = new THREE.Points(
+        new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(starPos, 3)),
+        new THREE.PointsMaterial({ color: 0x9fe9ff, size: 0.06, transparent: true, opacity: 0.7 })
+      );
+      scene.add(stars);
+
+      // Pointer drag interaction
+      let targetRotX = 0.2, targetRotY = 0, curX = 0.2, curY = 0;
+      let dragging = false, lastX = 0, lastY = 0, autoSpin = true;
+      mount.addEventListener('pointerdown', (e) => { dragging = true; autoSpin = false; lastX = e.clientX; lastY = e.clientY; });
+      window.addEventListener('pointerup', () => { dragging = false; setTimeout(() => autoSpin = true, 2500); });
+      window.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        targetRotY += (e.clientX - lastX) * 0.01;
+        targetRotX += (e.clientY - lastY) * 0.01;
+        lastX = e.clientX; lastY = e.clientY;
+      });
+
+      const clock = new THREE.Clock();
+      let raf;
+      function animate() {
+        raf = requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+        if (autoSpin) targetRotY += 0.0025;
+        curX += (targetRotX - curX) * 0.06;
+        curY += (targetRotY - curY) * 0.06;
+        wire.rotation.set(curX, curY, 0);
+        inner.rotation.set(curX * 0.8, -curY * 0.6, 0);
+        inner.material.emissiveIntensity = 0.3 + Math.sin(t * 2) * 0.12;
+        orbitGroup.rotation.y = curY * 0.5;
+        orbiters.forEach(m => {
+          const u = m.userData;
+          m.position.x = Math.cos(t * u.speed + u.phase) * u.radius;
+          m.position.z = Math.sin(t * u.speed + u.phase) * u.radius;
+        });
+        stars.rotation.y = t * 0.02;
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Pause when offscreen for performance
+      const heroObserver = new IntersectionObserver(([en]) => {
+        if (en.isIntersecting) { if (!raf) animate(); }
+        else { cancelAnimationFrame(raf); raf = null; }
+      }, { threshold: 0 });
+      heroObserver.observe(mount);
+
+      window.addEventListener('resize', () => {
+        W = mount.clientWidth; H = mount.clientHeight;
+        camera.aspect = W / H; camera.updateProjectionMatrix();
+        renderer.setSize(W, H);
+      });
+    }
+
+    try { initOrb(); }
+    catch (err) {
+      console.log('[v0] Three.js orb failed:', err.message);
+      fallback.textContent = 'CORE OFFLINE';
+    }
+
+    /* ---------- SKILLS CONSTELLATION (2D canvas) ---------- */
+    (function constellation() {
+      const cv = document.getElementById('constellation');
+      const ctx = cv.getContext('2d');
+      const section = document.getElementById('skills');
+      let pts = [], W, H, raf;
+
+      function resize() {
+        W = cv.width = section.clientWidth;
+        H = cv.height = section.clientHeight;
+        const count = Math.min(70, Math.floor(W * H / 18000));
+        pts = Array.from({ length: count }, () => ({
+          x: Math.random() * W, y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25
+        }));
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function draw() {
+        raf = requestAnimationFrame(draw);
+        ctx.clearRect(0, 0, W, H);
+        for (const p of pts) {
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0 || p.x > W) p.vx *= -1;
+          if (p.y < 0 || p.y > H) p.vy *= -1;
+        }
+        for (let i = 0; i < pts.length; i++) {
+          const a = pts[i];
+          ctx.beginPath();
+          ctx.arc(a.x, a.y, 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#00d4ff';
+          ctx.fill();
+          for (let j = i + 1; j < pts.length; j++) {
+            const b = pts[j];
+            const dx = a.x - b.x, dy = a.y - b.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < 130) {
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+              ctx.strokeStyle = `rgba(0,212,255,${(1 - dist / 130) * 0.4})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+        }
+      }
+      const cObs = new IntersectionObserver(([en]) => {
+        if (en.isIntersecting) { resize(); if (!raf) draw(); }
+        else { cancelAnimationFrame(raf); raf = null; }
+      }, { threshold: 0 });
+      cObs.observe(section);
+    })();
+  </script>
+
+  <!-- ============================================================
+       CLICK BURST EFFECT (pixel squares fly outward)
+  ============================================================ -->
+  <script>
+    (function clickBurst() {
+      // Skip on touch devices
+      if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return;
+      window.addEventListener('mousedown', (e) => {
+        const burst = document.createElement('div');
+        burst.className = 'click-burst';
+        burst.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+        burst.innerHTML = '<span></span><span></span><span></span><span></span>';
+        document.body.appendChild(burst);
+        setTimeout(() => burst.remove(), 320);
+      });
+    })();
+  </script>
+
+  <!-- ============================================================
+       SCROLL COMPANION SAMURAI — LOGIC
+  ============================================================ -->
+  <script>
+    (function companion() {
+      const sprite = document.getElementById('companionSprite');
+      const bubble = document.getElementById('companionBubble');
+      if (!sprite || !bubble) return;
+      // Skip entirely on mobile (container is hidden via CSS)
+      if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
+
+      let lastScrollY = window.scrollY;
+      let scrollTimeout = null;
+      let scrollDirection = 'down';
+      let isAttacking = false;
+      let currentSection = 'hero';
+      let bottomReached = false;
+      let topReached = true;
+
+      const DIALOGUE = {
+        hero: {
+          down: 'ANOTHER WARRIOR\nARRIVES...\nWELCOME. ���️',
+          up:   'BACK TO THE\nBEGINNING?\nHONORABLE.'
+        },
+        skills: {
+          down: 'THESE ARE MY\nWEAPONS. FORGED\nOVER 4 YEARS.',
+          up:   'RE-INSPECTING\nTHE ARSENAL?\nWISE MOVE.'
+        },
+        training: {
+          down: '320+ PROBLEMS\nSLAIN. THE\nGRIND IS REAL.',
+          up:   'THE GRIND\nNEVER STOPS.\nEVEN IN RETREAT.'
+        },
+        quests: {
+          down: 'EVERY QUEST\nMADE ME\nSTRONGER.',
+          up:   'REVISITING\nPAST BATTLES?\nGOOD STRATEGY.'
+        },
+        achievements: {
+          down: 'THESE HONORS?\nEARNED IN\nBATTLE.',
+          up:   'THE HALL OF\nFAME NEVER\nFADES. 🏆'
+        },
+        contact: {
+          down: 'YOU REACHED\nTHE END.\nNOW HIRE ME. 😤',
+          up:   'CHANGED YOUR\nMIND? THE\nSAMURAI WAITS.'
+        }
+      };
+
+      const QUOTES = [
+        "IT'S NOT A BUG.\nIT'S AN\nUNDOCUMENTED\nFEATURE. 🐛",
+        "99 BUGS...\n*FIX ONE*\n127 BUGS. 💀",
+        "WHY DOES IT\nWORK? NO IDEA.\nDON'T TOUCH IT.",
+        "STACKOVERFLOW\nIS DOWN.\nI AM NOTHING.",
+        "SLEEP IS JUST\nA SLOW REBOOT. 💤",
+        "GIT BLAME:\nIT WAS ME.\nALWAYS ME.",
+        "SHIPPING 2AM\nBUILDS\nCHARACTER. 🚀",
+        "COMPILING...\n*MAKES COFFEE*\n*STILL COMPILING*",
+        "THE SAMURAI\nCODES AT\nMIDNIGHT. ⚔️",
+        "400 LEETCODE\nPROBLEMS AND\nSTILL GOING."
+      ];
+
+      function setAnim(state) {
+        sprite.className = 'companion-sprite anim-' + state;
+      }
+
+      function setBubble(text) {
+        bubble.style.opacity = '0';
+        setTimeout(() => {
+          bubble.textContent = text;
+          bubble.style.opacity = '1';
+        }, 200);
+      }
+
+      function restoreSectionDialogue() {
+        const d = DIALOGUE[currentSection];
+        if (d) setBubble(d[scrollDirection] || d.down);
+      }
+
+      function spawnXpToast() {
+        const toast = document.createElement('div');
+        toast.className = 'companion-xp-toast';
+        toast.textContent = '+10 XP';
+        sprite.appendChild(toast);
+        setTimeout(() => toast.remove(), 1000);
+      }
+
+      /* ---------- SCROLL DIRECTION ---------- */
+      window.addEventListener('scroll', () => {
+        if (window.scrollY !== lastScrollY) {
+          scrollDirection = window.scrollY > lastScrollY ? 'down' : 'up';
+        }
+        lastScrollY = window.scrollY;
+
+        if (!isAttacking) {
+          sprite.style.transform = scrollDirection === 'down' ? 'scaleX(1)' : 'scaleX(-1)';
+          setAnim('run');
+        }
+
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          sprite.style.transform = 'scaleX(1)';
+          if (!isAttacking) setAnim('idle');
+        }, 150);
+
+        /* ---------- SPECIAL MOMENTS ---------- */
+        const max = document.body.scrollHeight - window.innerHeight;
+        // Reached bottom
+        if (window.scrollY >= max - 4) {
+          if (!bottomReached && !isAttacking) {
+            bottomReached = true;
+            playOneShot('attack', 'YOU MADE IT!\nNOW HIRE ME.\nI DARE YOU. 😤');
+          }
+        } else {
+          bottomReached = false;
+        }
+        // Back at top
+        if (window.scrollY <= 4) {
+          if (!topReached && !isAttacking) {
+            topReached = true;
+            playOneShot('hurt', 'BACK AT BASE.\nFULL HP. ❤️\nREADY TO FIGHT.');
+          }
+        } else {
+          topReached = false;
+        }
+      }, { passive: true });
+
+      function playOneShot(anim, text) {
+        isAttacking = true;
+        clearTimeout(scrollTimeout);
+        sprite.style.transform = 'scaleX(1)';
+        setAnim(anim);
+        setBubble(text);
+        const dur = anim === 'hurt' ? 400 : 700;
+        setTimeout(() => {
+          setAnim('idle');
+          isAttacking = false;
+        }, dur);
+        setTimeout(restoreSectionDialogue, 2500);
+      }
+
+      /* ---------- SECTION DIALOGUE ---------- */
+      const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(en => {
+          if (en.isIntersecting) {
+            currentSection = en.target.id;
+            if (!isAttacking) restoreSectionDialogue();
+          }
+        });
+      }, { threshold: 0.4 });
+      Object.keys(DIALOGUE).forEach(id => {
+        const sec = document.getElementById(id);
+        if (sec) sectionObserver.observe(sec);
+      });
+
+      /* ---------- CLICK TO ATTACK ---------- */
+      sprite.addEventListener('click', () => {
+        if (isAttacking) return;
+        isAttacking = true;
+        sprite.style.transform = 'scaleX(1)';
+        setAnim('attack');
+        setBubble(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+        spawnXpToast();
+        setTimeout(() => {
+          setAnim('idle');
+          isAttacking = false;
+        }, 700);
+        setTimeout(restoreSectionDialogue, 2500);
+      });
+
+      /* ---------- INIT ---------- */
+      setAnim('idle');
+      restoreSectionDialogue();
+    })();
+  </script>
+</html>
