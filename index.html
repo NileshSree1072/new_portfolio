@@ -80,6 +80,22 @@
       line-height: 1.6;
       overflow-x: hidden;
     }
+    /* Custom pixelated retro scrollbar */
+    ::-webkit-scrollbar {
+      width: 14px;
+      height: 14px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+      border-left: 3px solid var(--border);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--cyan);
+      border: 3px solid var(--bg);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold);
+    }
     img { display: block; max-width: 100%; }
     a { color: inherit; text-decoration: none; }
     ::selection { background: var(--cyan); color: #000; }
