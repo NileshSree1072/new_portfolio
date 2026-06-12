@@ -1599,6 +1599,38 @@ WELCOME. ⚔️</div>
               } catch (err) {}
             }, index * 80);
           });
+        },
+        playMelody() {
+          this.init();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          // Ascending C Major chord arpeggio followed by descending progression
+          const notes = [
+            { f: 261.63, d: 0.12 }, // C4
+            { f: 329.63, d: 0.12 }, // E4
+            { f: 392.00, d: 0.12 }, // G4
+            { f: 523.25, d: 0.18 }, // C5
+            { f: 392.00, d: 0.12 }, // G4
+            { f: 523.25, d: 0.3 }   // C5
+          ];
+          let time = 0;
+          notes.forEach(note => {
+            setTimeout(() => {
+              try {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(note.f, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + note.d);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + note.d);
+              } catch (err) {}
+            }, time);
+            time += note.d * 1200;
+          });
         }
       };
 
@@ -1624,8 +1656,14 @@ WELCOME. ⚔️</div>
       let topReached = true;
 
       /* ---------- COMPANION LEVELING STATE ---------- */
-      let companionLevel = 1;
-      let companionXp = 0;
+      let companionLevel = parseInt(localStorage.getItem('companionLevel') || '1');
+      let companionXp = parseFloat(localStorage.getItem('companionXp') || '0');
+
+      // Sync badge initially
+      setTimeout(() => {
+        const lvlBadge = document.getElementById('companionLevel');
+        if (lvlBadge) lvlBadge.textContent = 'LVL ' + companionLevel;
+      }, 50);
 
       function gainCompanionXp(amount) {
         companionXp += amount;
@@ -1641,6 +1679,8 @@ WELCOME. ⚔️</div>
             setTimeout(spawnXpToast, i * 150);
           }
         }
+        localStorage.setItem('companionLevel', companionLevel.toString());
+        localStorage.setItem('companionXp', companionXp.toFixed(1));
       }
 
       const DIALOGUE = {
@@ -1843,6 +1883,30 @@ WELCOME. ⚔️</div>
       const input = document.getElementById('terminalInput');
       if (!history || !input) return;
 
+      const THEMES = {
+        cyan: '#00d4ff',
+        gold: '#f5c518',
+        green: '#39ff7a',
+        red: '#ff4757',
+        purple: '#b82aff'
+      };
+
+      const applyTheme = (color) => {
+        if (THEMES[color]) {
+          document.documentElement.style.setProperty('--cyan', THEMES[color]);
+          localStorage.setItem('themePreference', color);
+          return true;
+        }
+        return false;
+      };
+
+      // Load saved theme preference on start
+      const savedTheme = localStorage.getItem('themePreference') || 'cyan';
+      applyTheme(savedTheme);
+
+      const cmdHistory = [];
+      let historyIdx = -1;
+
       const printLine = (text, className = '') => {
         const div = document.createElement('div');
         if (className) div.className = className;
@@ -1852,7 +1916,28 @@ WELCOME. ⚔️</div>
       };
 
       input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (cmdHistory.length === 0) return;
+          if (historyIdx === -1) {
+            historyIdx = cmdHistory.length - 1;
+          } else if (historyIdx > 0) {
+            historyIdx--;
+          }
+          input.value = cmdHistory[historyIdx];
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (cmdHistory.length === 0) return;
+          if (historyIdx !== -1) {
+            if (historyIdx < cmdHistory.length - 1) {
+              historyIdx++;
+              input.value = cmdHistory[historyIdx];
+            } else {
+              historyIdx = -1;
+              input.value = '';
+            }
+          }
+        } else if (e.key === 'Enter') {
           const rawVal = input.value;
           const cmd = rawVal.trim();
           input.value = '';
@@ -1866,15 +1951,23 @@ WELCOME. ⚔️</div>
             window.SoundSynthGlobal.play('sine', 650, 0.06);
           }
 
+          // Save to history
+          if (cmdHistory.length === 0 || cmdHistory[cmdHistory.length - 1] !== cmd) {
+            cmdHistory.push(cmd);
+          }
+          historyIdx = -1;
+
           const lowerCmd = cmd.toLowerCase().replace(/\s+/g, ' ');
 
           if (lowerCmd === 'help') {
             printLine(`AVAILABLE COMMANDS:
-  <span style="color: var(--cyan);">help</span>      - Display this list of commands.
-  <span style="color: var(--cyan);">skills</span>    - Show ability stats and weapon systems.
-  <span style="color: var(--cyan);">about</span>     - Query user: NILESH details.
-  <span style="color: var(--cyan);">clear</span>     - Purge terminal buffer.
-  <span style="color: var(--cyan);">sudo hack</span> - INITIATE CLASSIFIED OVERRIDE.`);
+  <span style="color: var(--cyan);">help</span>          - Display this list of commands.
+  <span style="color: var(--cyan);">skills</span>        - Show ability stats and weapon systems.
+  <span style="color: var(--cyan);">about</span>         - Query user: NILESH details.
+  <span style="color: var(--cyan);">theme &lt;color&gt;</span> - Set custom color theme (cyan, gold, green, red, purple).
+  <span style="color: var(--cyan);">play</span>          - Synthesize and play an 8-bit retro melody.
+  <span style="color: var(--cyan);">clear</span>         - Purge terminal buffer.
+  <span style="color: var(--cyan);">sudo hack</span>     - INITIATE CLASSIFIED OVERRIDE.`);
           } else if (lowerCmd === 'skills') {
             printLine(`WEAPON SYSTEMS LOADED:
   - <span style="color: var(--cyan);">Python</span> [MASTERED] (FastAPI, PyTorch, LangChain, FAISS)
@@ -1887,6 +1980,25 @@ CLASS: FULL-STACK ENGINEER / AI-ML EXPLORER
 STATUS: LEVEL 4 · FINAL YEAR B.TECH IT AT SSN CE
 COOP: READY FOR INTERNSHIPS & PLACEMENTS
 GUILD RANK: RANKED 6TH NATIONALLY IN ROBOTICS COMP`);
+          } else if (lowerCmd.startsWith('theme')) {
+            const parts = lowerCmd.split(' ');
+            const color = parts[1];
+            if (color && applyTheme(color)) {
+              printLine(`[ THEME ACCENT COLOR CHANGED TO ${color.toUpperCase()} ]`);
+              if (window.SoundSynthGlobal) {
+                window.SoundSynthGlobal.play('sine', 880, 0.08);
+              }
+            } else {
+              printLine(`<span style="color: var(--lc-hard);">INVALID THEME. CHOOSE: cyan, gold, green, red, or purple.</span>`);
+              if (window.SoundSynthGlobal) {
+                window.SoundSynthGlobal.play('sawtooth', 140, 0.16);
+              }
+            }
+          } else if (lowerCmd === 'play') {
+            printLine(`[ SYNTHESIZING CHIPTUNE TUNE... 🎵 ]`);
+            if (window.SoundSynthGlobal) {
+              window.SoundSynthGlobal.playMelody();
+            }
           } else if (lowerCmd === 'clear') {
             history.innerHTML = '';
           } else if (lowerCmd === 'sudo hack') {
