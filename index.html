@@ -1127,22 +1127,9 @@ WELCOME. ⚔️</div>
         status.textContent = 'API UNREACHABLE — OFFLINE MODE';
       }
 
-      // Try direct LeetCode GraphQL first, fall back to public proxy.
-      const query = `query getUserStats($username: String!) {
-        matchedUser(username: $username) {
-          submitStats { acSubmissionNum { difficulty count } }
-          userCalendar { streak totalActiveDays }
-          profile { ranking reputation }
-        }
-        allQuestionsCount { difficulty count }
-      }`;
-
-      fetch('https://leetcode.com/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, variables: { username: USERNAME } })
-      })
-        .then(r => { if (!r.ok) throw new Error('graphql ' + r.status); return r.json(); })
+      // Try local Next.js proxy route first, fallback to public proxy.
+      fetch('/api/leetcode')
+        .then(r => { if (!r.ok) throw new Error('local api ' + r.status); return r.json(); })
         .then(json => {
           const u = json && json.data && json.data.matchedUser;
           if (!u) throw new Error('no matchedUser');
@@ -1160,8 +1147,7 @@ WELCOME. ⚔️</div>
           });
         })
         .catch(err => {
-          console.log('[v0] LeetCode GraphQL failed, trying proxy:', err.message);
-          // Fallback proxy returns aggregate JSON with per-difficulty totals
+          console.log('[v0] Local proxy failed, trying public REST API:', err.message);
           fetch('https://alfa-leetcode-api.onrender.com/userProfile/' + USERNAME)
             .then(r => { if (!r.ok) throw new Error('proxy ' + r.status); return r.json(); })
             .then(p => {
@@ -1176,7 +1162,7 @@ WELCOME. ⚔️</div>
             })
             .catch(err2 => {
               console.log('[v0] LeetCode proxy failed:', err2.message);
-              offline(); // keep placeholder values silently
+              offline();
             });
         });
     })();
